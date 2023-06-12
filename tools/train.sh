@@ -1,0 +1,1 @@
+python train.py --cfg ../experiments/simclr_cifar10_infonce.yaml
