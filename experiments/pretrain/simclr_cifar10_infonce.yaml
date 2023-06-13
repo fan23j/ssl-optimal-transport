@@ -1,0 +1,68 @@
+DATA_DIR: "/home/main/ssl-optimal-transport/data"
+EXP_ID: "simclr_cifar10_infonce"
+TASK: "simclr_pretrain"
+DEBUG: 0
+DEBUG_THEME: "white"
+SEED: 317
+OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/pretrain"
+LOG_DIR: ""
+EXPERIMENT_NAME: ""
+GPUS: [0]
+WORKERS: 0
+PRINT_FREQ: 0
+PIN_MEMORY: true
+RANK: 0
+SAVE_RESULTS: true
+
+CUDNN:
+    BENCHMARK: true
+
+MODEL:
+    INIT_WEIGHTS: false
+    PRETRAINED: "/data/pretrained_models/imagenet/hrnet_w32-36af842e.pth"
+    NUM_CLASSES: 1
+    FEATURE_DIM: 128
+    NAME: "resnet50"
+    INPUT_H: 32
+    INPUT_W: 32
+
+LOSS:
+    METRIC: ["infonce"]
+    TEMPERATURE: 0.5
+
+DATASET:
+    DATASET: "CIFAR10"
+    TRAIN_SET: "train"
+    TEST_SET: "valid"
+
+    # training data augmentation
+    MEAN: [0.408, 0.447, 0.470]
+    STD: [0.289, 0.274, 0.278]
+    SHIFT: 0.1
+    SCALE: 0.4
+    ROTATE: 0.
+    IMAGE_SIZE: 32
+    RANDOM_CROP: true
+
+TRAIN:
+    OPTIMIZER: "adam"
+    DISTRIBUTE: false
+    LOCAL_RANK: 0
+    HIDE_DATA_TIME: false
+    SAVE_ALL_MODEL: false
+    RESUME: false
+    EPOCHS: 500
+    NUM_ITERS: -1
+    LR: 1e-3
+    WD: 1e-6
+    BATCH_SIZE: 256
+
+    CHECKPOINT: ""
+    SHUFFLE: true
+    VAL_INTERVALS: 0
+    TRAINVAL: false
+
+TEST:
+    # Test Model Epoch
+    MODEL_PATH: "/home/tensorboy/data/centerpose/model_zoo/mobilenetV3_1x.pth"
+    TASK: "simclr_linear"

@@ -1,9 +1,14 @@
 import torchvision
 from .transforms import TransformsSimCLR
 
+from .dataset.cifar10 import CIFAR10
+
+
 def get_dataset(cfg, train=True):
     transform = (
-        TransformsSimCLR(size=cfg.DATASET.IMAGE_SIZE) if train else TransformsSimCLR(size=cfg.DATASET.IMAGE_SIZE).test_transform
+        TransformsSimCLR(size=cfg.DATASET.IMAGE_SIZE)
+        if train
+        else TransformsSimCLR(size=cfg.DATASET.IMAGE_SIZE).test_transform
     )
     if cfg.DATASET.DATASET == "STL10":
         train_dataset = torchvision.datasets.STL10(
@@ -19,13 +24,13 @@ def get_dataset(cfg, train=True):
             transform=transform,
         )
     elif cfg.DATASET.DATASET == "CIFAR10":
-        train_dataset = torchvision.datasets.CIFAR10(
+        train_dataset = CIFAR10(
             cfg.DATA_DIR,
             train=True,
             download=True,
             transform=transform,
         )
-        test_dataset = torchvision.datasets.CIFAR10(
+        test_dataset = CIFAR10(
             cfg.DATA_DIR,
             train=False,
             download=True,

@@ -3,12 +3,15 @@ import torch.nn as nn
 from .criterion.infonce import Info_NCE_Loss
 from .criterion.sinkhorn import Sinkhorn_Loss
 from .criterion.gromov_wasserstein.gromov_wasserstein import Gromov_Wasserstein_Loss
+from .criterion.cross_entropy import Cross_Entropy_Loss
 
 _loss_factory = {
-    'infonce': Info_NCE_Loss,
-    'sinkhorn': Sinkhorn_Loss,
-    'gromov_wasserstein': Gromov_Wasserstein_Loss,
+    "infonce": Info_NCE_Loss,
+    "sinkhorn": Sinkhorn_Loss,
+    "gromov_wasserstein": Gromov_Wasserstein_Loss,
+    "cross_entropy": Cross_Entropy_Loss,
 }
+
 
 class Loss(nn.Module):
     def __init__(self, cfg):
@@ -22,5 +25,5 @@ class Loss(nn.Module):
             loss_dict = loss(out_1, out_2)
             total_loss += list(loss_dict.values())[0]
             loss_states.update(loss_dict)
-        loss_states['loss'] = total_loss
+        loss_states["loss"] = total_loss
         return total_loss, loss_states
