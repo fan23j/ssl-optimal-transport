@@ -16,4 +16,4 @@ class CIFAR10(CIFAR10):
         if self.target_transform is not None:
             target = self.target_transform(target)
 
-        return {"out_1": out_1[0], "out_2": out_2[0], "target": target}
+        return {"out_1": out_1, "out_2": out_2, "target": target}

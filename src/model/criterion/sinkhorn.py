@@ -2,13 +2,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Sinkhorn_Loss(nn.Module):
     def __init__(self, cfg):
         super(Sinkhorn_Loss, self).__init__()
         self.temperature = cfg.LOSS.TEMPERATURE
         self.batch_size = cfg.TRAIN.BATCH_SIZE
         self.world_size = len(cfg.GPUS) if cfg.TRAIN.DISTRIBUTE else 1
-        self.sinkhorn_iters = cfg.LOSS.SINKHORN_ITERS
+        self.sinkhorn_iters = cfg.LOSS.SINKHORN_MAX_ITER
         self.gamma = cfg.LOSS.SINKHORN_GAMMA
 
     def cosine_similarity(self, out_1, out_2):
@@ -30,7 +31,7 @@ class Sinkhorn_Loss(nn.Module):
 
         # Calculate cosine similarity
         sim_matrix = torch.matmul(out, out.t())
-        
+
         return sim_matrix
 
     def sinkhorn_knopp(self, cost_matrix, epsilon, num_iters):
@@ -56,18 +57,20 @@ class Sinkhorn_Loss(nn.Module):
 
             # Row normalize
             p_matrix = p_matrix / p_matrix.sum(dim=1, keepdim=True)
-        
+
         # If num_iters is even, transpose p_matrix one more time to bring it back to original orientation
         if num_iters % 2 == 0:
             p_matrix = p_matrix.t()
 
         return p_matrix
-    
+
     def forward(self, out_1, out_2):
         sim_matrix = self.cosine_similarity(out_1, out_2)
         cost_matrix = 1.0 - sim_matrix
-        cost_matrix.fill_diagonal_(float('inf'))
-        p_matrix = self.sinkhorn_knopp(cost_matrix, self.temperature, self.sinkhorn_iters)
+        cost_matrix.fill_diagonal_(float("inf"))
+        p_matrix = self.sinkhorn_knopp(
+            cost_matrix, self.temperature, self.sinkhorn_iters
+        )
 
         prob_i = torch.diag(p_matrix, self.batch_size)
         prob_j = torch.diag(p_matrix, -self.batch_size)
@@ -78,4 +81,4 @@ class Sinkhorn_Loss(nn.Module):
         # Calculate the loss.
         loss = -torch.log(prob_p).sum() / (2 * self.batch_size * self.world_size)
 
-        return {'sinkhorn_loss': loss * self.gamma}
+        return {"sinkhorn_loss": loss * self.gamma}

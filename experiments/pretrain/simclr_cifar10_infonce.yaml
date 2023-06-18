@@ -8,7 +8,7 @@ OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/pretrain"
 LOG_DIR: ""
 EXPERIMENT_NAME: ""
 GPUS: [0]
-WORKERS: 0
+WORKERS: 8
 PRINT_FREQ: 0
 PIN_MEMORY: true
 RANK: 0
@@ -36,13 +36,13 @@ DATASET:
     TEST_SET: "valid"
 
     # training data augmentation
-    MEAN: [0.408, 0.447, 0.470]
-    STD: [0.289, 0.274, 0.278]
-    SHIFT: 0.1
-    SCALE: 0.4
-    ROTATE: 0.
+    MEAN: [0.4914, 0.4822, 0.4465]
+    STD: [0.2023, 0.1994, 0.2010]
+    RANDOM_RESIZED_CROP: 32
+    RANDOM_HORIZONTAL_FLIP: 0.5
+    COLOR_JITTER: [0.4, 0.4, 0.4, 0.1, 0.8]
+    RANDOM_GRAYSCALE: 0.2
     IMAGE_SIZE: 32
-    RANDOM_CROP: true
 
 TRAIN:
     OPTIMIZER: "adam"

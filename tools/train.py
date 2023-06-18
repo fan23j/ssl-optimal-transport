@@ -89,11 +89,15 @@ def main(cfg, local_rank):
 
     # load in dataset
     print("Setting up data...")
-    val_dataset, train_dataset = get_dataset(cfg)
+    train_dataset, val_dataset = get_dataset(cfg)
 
     # Create validation dataloader
     val_loader = torch.utils.data.DataLoader(
-        val_dataset, batch_size=1, shuffle=False, num_workers=1, pin_memory=True
+        val_dataset,
+        batch_size=cfg.TEST.BATCH_SIZE,
+        shuffle=False,
+        num_workers=1,
+        pin_memory=True,
     )
 
     # Create training dataloader
@@ -115,6 +119,7 @@ def main(cfg, local_rank):
     print("Starting training...")
     log_file = os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, "log.csv")
     header_prepared = False
+    best = 0.0
 
     for epoch in range(start_epoch + 1, cfg.TRAIN.EPOCHS + 1):
         mark = epoch if cfg.TRAIN.SAVE_ALL_MODEL else "last"
@@ -132,6 +137,11 @@ def main(cfg, local_rank):
             )
             with torch.no_grad():
                 log_dict_val = trainer.val(epoch, val_loader)
+            if log_dict_val['ACC@1'] > best:
+                best = log_dict_val['ACC@1']
+                save_model(
+                    os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, "model_best.pth"), epoch, model
+                )
         else:
             save_model(
                 os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, "model_last.pth"), epoch, model
@@ -156,7 +166,8 @@ def main(cfg, local_rank):
                 writer.writeheader()
                 header_prepared = True
             writer.writerow(data_row)
-
+    if cfg.TRAIN.VAL_INTERVALS > 0:
+        print("Best ACC@1: ", best)
 
 if __name__ == "__main__":
     args = parse_args()

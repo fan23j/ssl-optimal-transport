@@ -1,10 +1,10 @@
 DATA_DIR: "/home/main/ssl-optimal-transport/data"
-EXP_ID: "simclr_cifar10_infonce"
-TASK: "simclr_linear"
+EXP_ID: "simclr_cifar10_gw"
+TASK: "simclr_pretrain"
 DEBUG: 0
 DEBUG_THEME: "white"
 SEED: 317
-OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/finetune"
+OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/pretrain"
 LOG_DIR: ""
 EXPERIMENT_NAME: ""
 GPUS: [0]
@@ -18,16 +18,19 @@ CUDNN:
     BENCHMARK: true
 
 MODEL:
-    INIT_WEIGHTS: true
-    PRETRAINED: "/home/main/ssl-optimal-transport/runs/pretrain/simclr_cifar10_infonce/model_last.pth"
+    INIT_WEIGHTS: false
+    PRETRAINED: ""
     NUM_CLASSES: 10
     NAME: "resnet50"
     INPUT_H: 32
     INPUT_W: 32
 
 LOSS:
-    METRIC: ["cross_entropy"]
+    METRIC: ["gromov_wasserstein"]
     TEMPERATURE: 0.5
+    SINKHORN_MAX_ITER: 5
+    GW_MAX_ITER: 5
+    GW_EPSILON: 0.05
 
 DATASET:
     DATASET: "CIFAR10"
@@ -39,6 +42,7 @@ DATASET:
     STD: [0.2023, 0.1994, 0.2010]
     RANDOM_RESIZED_CROP: 32
     RANDOM_HORIZONTAL_FLIP: 0.5
+    # color jitter
     COLOR_JITTER: [0.4, 0.4, 0.4, 0.1, 0.8]
     RANDOM_GRAYSCALE: 0.2
     IMAGE_SIZE: 32
@@ -50,7 +54,7 @@ TRAIN:
     HIDE_DATA_TIME: false
     SAVE_ALL_MODEL: false
     RESUME: false
-    EPOCHS: 100
+    EPOCHS: 500
     NUM_ITERS: -1
     LR: 1e-3
     WD: 1e-6
@@ -58,11 +62,5 @@ TRAIN:
 
     CHECKPOINT: ""
     SHUFFLE: true
-    VAL_INTERVALS: 1
+    VAL_INTERVALS: 0
     TRAINVAL: false
-
-TEST:
-    BATCH_SIZE: 256
-    OUTPUT_FILE: "infonce_preds.csv"
-    TASK: "simclr_linear"
-    MODEL_PATH: "/home/main/ssl-optimal-transport/runs/finetune/simclr_cifar10_infonce/model_last.pth"

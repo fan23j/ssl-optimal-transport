@@ -38,9 +38,12 @@ class BaseTrainer(object):
 
     def save_result(self, output, batch, results):
         raise NotImplementedError
+    
+    def train(self, epoch, data_loader):
+        raise NotImplementedError
 
     def val(self, epoch, data_loader, val_dataset=None):
         raise NotImplementedError
 
-    def train(self, epoch, data_loader):
+    def test(self, data_loader, test_dataset=None):
         raise NotImplementedError
