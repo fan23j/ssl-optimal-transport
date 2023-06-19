@@ -3,6 +3,7 @@ import torchvision.transforms as transforms
 from .transforms import Transforms
 
 from .dataset.cifar10 import CIFAR10
+from .dataset.cifar100 import CIFAR100
 
 
 def get_dataset(cfg):
@@ -35,13 +36,13 @@ def get_dataset(cfg):
             transform=test_transform,
         )
     elif cfg.DATASET.DATASET == "CIFAR100":
-        train_dataset = torchvision.datasets.CIFAR100(
+        train_dataset = CIFAR100(
             cfg.DATA_DIR,
             train=True,
             download=True,
             transform=train_transform,
         )
-        test_dataset = torchvision.datasets.CIFAR100(
+        test_dataset = CIFAR100(
             cfg.DATA_DIR,
             train=False,
             download=True,

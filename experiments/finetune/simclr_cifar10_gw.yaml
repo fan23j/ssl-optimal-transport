@@ -22,6 +22,7 @@ MODEL:
     PRETRAINED: "/home/main/ssl-optimal-transport/runs/pretrain/simclr_cifar10_gw/model_last.pth"
     NUM_CLASSES: 10
     NAME: "resnet50"
+    HEAD_NAME: "linear"
     INPUT_H: 32
     INPUT_W: 32
 
