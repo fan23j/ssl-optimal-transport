@@ -24,8 +24,10 @@ class ResNet50(nn.Module):
     def forward(self, x):
         x = self.f(x)
         feature = torch.flatten(x, start_dim=1)
-        out = self.head(feature)
-        if isinstance(self.head, nn.Sequential):  # Projection head
-            return F.normalize(feature, dim=-1), F.normalize(out, dim=-1)
-        else:  # Linear classifier
-            return out
+        return feature
+
+
+def get_resnet50(cfg):
+    model = ResNet50()
+
+    return model

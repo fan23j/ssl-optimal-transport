@@ -1,10 +1,10 @@
 DATA_DIR: "/home/main/ssl-optimal-transport/data"
-EXP_ID: "simclr_cifar10_infonce+sinkhorn"
-TASK: "simclr_linear"
+EXP_ID: "mae_cifar10_mse"
+TASK: "mae_pretrain"
 DEBUG: 0
 DEBUG_THEME: "white"
 SEED: 317
-OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/finetune"
+OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/pretrain"
 LOG_DIR: ""
 EXPERIMENT_NAME: ""
 GPUS: [0]
@@ -18,17 +18,26 @@ CUDNN:
     BENCHMARK: true
 
 MODEL:
-    INIT_WEIGHTS: true
-    PRETRAINED: "/home/main/ssl-optimal-transport/runs/pretrain/simclr_cifar10_infonce+sinkhorn/model_last.pth"
+    INIT_WEIGHTS: false
+    PRETRAINED: ""
     NUM_CLASSES: 10
-    NAME: "resnet50"
-    HEAD_NAME: "linear"
+    NAME: "vit"
+    HEAD_NAME: "mae_decode"
     INPUT_H: 32
     INPUT_W: 32
+    MAE_EMBED_DIM: 384
+    MAE_DECODER_EMBED_DIM: 256
+    MAE_NUM_PATCHES: 8
+    MAE_PATCH_SIZE: 4
+    MAE_DECODER_NUM_HEADS: 6
+    MAE_MLP_RATIO: 4
+    MAE_IN_CHANS: 3
+    MAE_DEPTH: 6
 
 LOSS:
-    METRIC: ["cross_entropy"]
-    TEMPERATURE: 0.5
+    METRIC: ["mae_mse"]
+    NORM_PIX_LOSS: False
+    NORM_PIX_LOSS_EPSILON: 1e-6
 
 DATASET:
     DATASET: "CIFAR10"
@@ -40,6 +49,7 @@ DATASET:
     STD: [0.2023, 0.1994, 0.2010]
     RANDOM_RESIZED_CROP: 32
     RANDOM_HORIZONTAL_FLIP: 0.5
+    # color jitter
     COLOR_JITTER: [0.4, 0.4, 0.4, 0.1, 0.8]
     RANDOM_GRAYSCALE: 0.2
     IMAGE_SIZE: 32
@@ -51,7 +61,7 @@ TRAIN:
     HIDE_DATA_TIME: false
     SAVE_ALL_MODEL: false
     RESUME: false
-    EPOCHS: 100
+    EPOCHS: 500
     NUM_ITERS: -1
     LR: 1e-3
     WD: 1e-6
@@ -59,5 +69,5 @@ TRAIN:
 
     CHECKPOINT: ""
     SHUFFLE: true
-    VAL_INTERVALS: 1
+    VAL_INTERVALS: 0
     TRAINVAL: false

@@ -4,12 +4,14 @@ from .criterion.infonce import Info_NCE_Loss
 from .criterion.sinkhorn import Sinkhorn_Loss
 from .criterion.gromov_wasserstein.gromov_wasserstein import Gromov_Wasserstein_Loss
 from .criterion.cross_entropy import Cross_Entropy_Loss
+from .criterion.mae_mse import Mae_MSE_Loss
 
 _loss_factory = {
     "infonce": Info_NCE_Loss,
     "sinkhorn": Sinkhorn_Loss,
     "gromov_wasserstein": Gromov_Wasserstein_Loss,
     "cross_entropy": Cross_Entropy_Loss,
+    "mae_mse": Mae_MSE_Loss,
 }
 
 
