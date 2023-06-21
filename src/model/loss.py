@@ -20,11 +20,11 @@ class Loss(nn.Module):
         super(Loss, self).__init__()
         self.losses = [_loss_factory[name](cfg=cfg) for name in cfg.LOSS.METRIC]
 
-    def forward(self, out_1, out_2):
+    def forward(self, *args):
         total_loss = 0
         loss_states = {}
         for loss in self.losses:
-            loss_dict = loss(out_1, out_2)
+            loss_dict = loss(*args)
             total_loss += list(loss_dict.values())[0]
             loss_states.update(loss_dict)
         loss_states["loss"] = total_loss

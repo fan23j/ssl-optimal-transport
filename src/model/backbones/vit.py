@@ -54,6 +54,8 @@ class MaskedAutoencoderViT(nn.Module):
             ]
         )
         self.norm = self.norm_layer(cfg.MODEL.MAE_EMBED_DIM)
+        # for loss calculation
+        self.mask = None
 
     def unpatchify(self, x):
         """
@@ -122,6 +124,7 @@ class MaskedAutoencoderViT(nn.Module):
 
     def forward(self, imgs, mask_ratio=0.75):
         latent, mask, ids_restore = self.forward_encoder(imgs, mask_ratio)
+        self.mask = mask
         return latent, ids_restore
 
 

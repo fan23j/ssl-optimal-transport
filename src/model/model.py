@@ -40,10 +40,25 @@ def create_model(arch, cfg):
     return BackBone(arch, cfg)
 
 
-def save_model(out, epoch, model):
-    # To save a DataParallel model generically, save the model.module.state_dict().
-    # This way, you have the flexibility to load the model any way you want to any device you want.
+def load_model(out, model, optimizer):
+    checkpoint = torch.load(out)
+    model.load_state_dict(checkpoint["state_dict"], strict=False)
+    optimizer.load_state_dict(checkpoint["optimizer"])
+    epoch = checkpoint["epoch"]
+    return model, optimizer, epoch
+
+
+def save_model(out, epoch, model, optimizer):
     if isinstance(model, torch.nn.DataParallel):
-        torch.save(model.module.state_dict(), out)
+        state = {
+            "epoch": epoch,
+            "state_dict": model.module.state_dict(),
+            "optimizer": optimizer.state_dict(),
+        }
     else:
-        torch.save(model.state_dict(), out)
+        state = {
+            "epoch": epoch,
+            "state_dict": model.state_dict(),
+            "optimizer": optimizer.state_dict(),
+        }
+    torch.save(state, out)

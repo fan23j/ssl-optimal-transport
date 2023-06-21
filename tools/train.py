@@ -11,7 +11,7 @@ import torch.utils.data
 import _init_paths
 from config import cfg, update_config
 from datasets.dataset_factory import get_dataset
-from model.model import create_model, save_model
+from model.model import create_model, save_model, load_model
 from train.train_factory import train_factory
 
 
@@ -68,7 +68,9 @@ def main(cfg, local_rank):
     start_epoch = 0
     if cfg.MODEL.INIT_WEIGHTS:
         print("load pretrained model from {}".format(cfg.MODEL.PRETRAINED))
-        model.load_state_dict(torch.load(cfg.MODEL.PRETRAINED), strict=False)
+        model, optimizer, start_epoch = load_model(
+            cfg.MODEL.PRETRAINED, model, optimizer
+        )
 
     # set up trainer code from train_factory
     Trainer = train_factory[cfg.TASK]
@@ -134,17 +136,24 @@ def main(cfg, local_rank):
                 os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, "model_{}.pth".format(mark)),
                 epoch,
                 model,
+                optimizer,
             )
             with torch.no_grad():
                 log_dict_val = trainer.val(epoch, val_loader)
-            if log_dict_val['ACC@1'] > best:
-                best = log_dict_val['ACC@1']
+            if log_dict_val["ACC@1"] > best:
+                best = log_dict_val["ACC@1"]
                 save_model(
-                    os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, "model_best.pth"), epoch, model
+                    os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, "model_best.pth"),
+                    epoch,
+                    model,
+                    optimizer,
                 )
         else:
             save_model(
-                os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, "model_last.pth"), epoch, model
+                os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, "model_last.pth"),
+                epoch,
+                model,
+                optimizer,
             )
             if epoch % 25 == 0:
                 save_model(
@@ -153,6 +162,7 @@ def main(cfg, local_rank):
                     ),
                     epoch,
                     model,
+                    optimizer,
                 )
             log_dict_val = {}  # create an empty log_dict_val for non-validation epochs
 
@@ -168,6 +178,7 @@ def main(cfg, local_rank):
             writer.writerow(data_row)
     if cfg.TRAIN.VAL_INTERVALS > 0:
         print("Best ACC@1: ", best)
+
 
 if __name__ == "__main__":
     args = parse_args()
