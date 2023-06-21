@@ -40,9 +40,9 @@ def create_model(arch, cfg):
     return BackBone(arch, cfg)
 
 
-def load_model(out, model, optimizer):
+def load_model(out, model, optimizer, strict=False):
     checkpoint = torch.load(out)
-    model.load_state_dict(checkpoint["state_dict"], strict=False)
+    model.load_state_dict(checkpoint["state_dict"], strict=strict)
     optimizer.load_state_dict(checkpoint["optimizer"])
     epoch = checkpoint["epoch"]
     return model, optimizer, epoch

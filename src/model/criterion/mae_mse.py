@@ -1,11 +1,19 @@
 import torch
 import torch.nn as nn
 
+from timm.models.vision_transformer import PatchEmbed
+
 
 class Mae_MSE_Loss(nn.Module):
     def __init__(self, cfg):
         super(Mae_MSE_Loss, self).__init__()
         self.norm_pix_loss = cfg.LOSS.NORM_PIX_LOSS
+        self.patch_embed = PatchEmbed(
+            cfg.DATASET.IMAGE_SIZE,
+            cfg.MODEL.MAE_PATCH_SIZE,
+            cfg.MODEL.MAE_IN_CHANS,
+            cfg.MODEL.MAE_EMBED_DIM,
+        )
 
     def patchify(self, imgs):
         """
@@ -27,7 +35,7 @@ class Mae_MSE_Loss(nn.Module):
         pred: [N, L, p*p*3]
         mask: [N, L], 0 is keep, 1 is remove,
         """
-        target = self.patchify(imgs)
+        target = self.patchify(imgs).to(pred.device)
         if self.norm_pix_loss:
             mean = target.mean(dim=-1, keepdim=True)
             var = target.var(dim=-1, keepdim=True)

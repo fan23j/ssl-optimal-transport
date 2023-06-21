@@ -18,7 +18,9 @@ class MAEPreTrainer(BaseTrainer):
 
             pred = self.model(imgs)
 
-            loss, loss_states = self.loss(imgs, pred, self.model.mask)
+            loss, loss_states = self.loss(
+                imgs, pred, self.model.module.backbone_model.mask
+            )
 
             self.optimizer.zero_grad()
             loss.backward()
