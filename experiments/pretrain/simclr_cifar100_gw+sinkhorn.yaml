@@ -1,5 +1,5 @@
 DATA_DIR: "/home/main/ssl-optimal-transport/data"
-EXP_ID: "simclr_cifar10_infonce+sinkhorn"
+EXP_ID: "simclr_cifar100_gw+sinkhorn"
 TASK: "simclr_pretrain"
 DEBUG: 0
 DEBUG_THEME: "white"
@@ -20,20 +20,23 @@ CUDNN:
 MODEL:
     INIT_WEIGHTS: false
     PRETRAINED: ""
-    NUM_CLASSES: 10
-    NAME: "resnet50"
+    NUM_CLASSES: 100
     HEAD_NAME: "projection"
+    NAME: "resnet50"
     INPUT_H: 32
     INPUT_W: 32
 
 LOSS:
-    METRIC: ["infonce", "sinkhorn"]
+    METRIC: ["sinkhorn", "gromov_wasserstein"]
     TEMPERATURE: 0.5
-    SINKHORN_MAX_ITER: 10
+    SINKHORN_MAX_ITER: 5
     SINKHORN_GAMMA: 1.0
+    GW_MAX_ITER: 5
+    GW_EPSILON: 0.05
+    GW_GAMMA: 0.1
 
 DATASET:
-    DATASET: "CIFAR10"
+    DATASET: "CIFAR100"
     TRAIN_SET: "train"
     TEST_SET: "valid"
 

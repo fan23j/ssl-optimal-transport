@@ -21,6 +21,7 @@ MODEL:
     INIT_WEIGHTS: false
     PRETRAINED: ""
     NUM_CLASSES: 10
+    HEAD_NAME: "projection"
     NAME: "resnet50"
     INPUT_H: 32
     INPUT_W: 32

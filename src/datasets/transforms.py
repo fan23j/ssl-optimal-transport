@@ -3,6 +3,7 @@ import torchvision.transforms as transforms
 
 class Transforms:
     def __init__(self, cfg):
+        self.cfg = cfg
         self.train_transform = transforms.Compose(
             [
                 transforms.RandomResizedCrop(cfg.DATASET.RANDOM_RESIZED_CROP),
@@ -32,4 +33,6 @@ class Transforms:
         )
 
     def __call__(self):
+        if self.cfg.DATASET.USE_TEST_AUG:
+            return self.test_transform, self.test_transform
         return self.train_transform, self.test_transform

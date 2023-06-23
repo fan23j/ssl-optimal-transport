@@ -5,8 +5,11 @@ from ..base_trainer import BaseTrainer
 
 
 class MAEPreTrainer(BaseTrainer):
-    def __init__(self, cfg, model, optimizer):
-        super(MAEPreTrainer, self).__init__(cfg, model, optimizer)
+    def __init__(self, cfg, model, optimizer, lr_scheduler):
+        super(MAEPreTrainer, self).__init__(cfg, model, optimizer, lr_scheduler)
+        # 4096 batch size to achieve SOTA in original paper
+        self.steps_per_update = 4096 // cfg.TRAIN.BATCH_SIZE
+        self.step_count = 0
 
     def train(self, epoch, data_loader):
         self.model.train()
@@ -14,17 +17,17 @@ class MAEPreTrainer(BaseTrainer):
         average_loss_states = {}
 
         for batch in train_bar:
+            self.step_count += 1
             imgs = batch["out_1"]
 
-            pred = self.model(imgs)
+            pred, mask = self.model(imgs)
 
-            loss, loss_states = self.loss(
-                imgs, pred, self.model.module.backbone_model.mask
-            )
-
-            self.optimizer.zero_grad()
+            loss, loss_states = self.loss(imgs, pred, mask)
             loss.backward()
-            self.optimizer.step()
+
+            if self.step_count % self.steps_per_update == 0:
+                self.optimizer.zero_grad()
+                self.optimizer.step()
 
             # Accumulate average_loss_states
             for k, v in loss_states.items():
@@ -39,7 +42,7 @@ class MAEPreTrainer(BaseTrainer):
                     epoch, self.cfg.TRAIN.EPOCHS, loss_state_str
                 )
             )
-
+        self.lr_scheduler.step()
         # Average the accumulated loss_states
         for k in average_loss_states:
             average_loss_states[k] /= len(data_loader)

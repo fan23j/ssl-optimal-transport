@@ -23,6 +23,7 @@ MODEL:
     NUM_CLASSES: 1
     FEATURE_DIM: 128
     NAME: "resnet50"
+    HEAD_NAME: "projection"
     INPUT_H: 32
     INPUT_W: 32
 

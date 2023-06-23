@@ -1,6 +1,6 @@
 DATA_DIR: "/home/main/ssl-optimal-transport/data"
-EXP_ID: "simclr_cifar10_infonce+sinkhorn"
-TASK: "simclr_pretrain"
+EXP_ID: "mae_cifar10_mse"
+TASK: "mae_linear"
 DEBUG: 0
 DEBUG_THEME: "white"
 SEED: 317
@@ -18,19 +18,28 @@ CUDNN:
     BENCHMARK: true
 
 MODEL:
-    INIT_WEIGHTS: false
-    PRETRAINED: ""
+    INIT_WEIGHTS: true
+    PRETRAINED: "/home/main/ssl-optimal-transport/runs/pretrain/mae_cifar10_mse/model_last.pth"
     NUM_CLASSES: 10
-    NAME: "resnet50"
-    HEAD_NAME: "projection"
+    NAME: "vit"
+    HEAD_NAME: "none"
     INPUT_H: 32
     INPUT_W: 32
+    MAE_EMBED_DIM: 384
+    MAE_DECODER_EMBED_DIM: 256
+    MAE_NUM_PATCHES: 64
+    MAE_PATCH_SIZE: 4
+    MAE_DECODER_NUM_HEADS: 8
+    MAE_MLP_RATIO: 4
+    MAE_IN_CHANS: 3
+    MAE_DEPTH: 6
+    MAE_NUM_HEADS: 6
+    MAE_DECODER_DEPTH: 4
+    MAE_GLOBAL_POOL: true
 
 LOSS:
-    METRIC: ["infonce", "sinkhorn"]
+    METRIC: ["cross_entropy"]
     TEMPERATURE: 0.5
-    SINKHORN_MAX_ITER: 10
-    SINKHORN_GAMMA: 1.0
 
 DATASET:
     DATASET: "CIFAR10"
@@ -54,7 +63,7 @@ TRAIN:
     HIDE_DATA_TIME: false
     SAVE_ALL_MODEL: false
     RESUME: false
-    EPOCHS: 500
+    EPOCHS: 100
     NUM_ITERS: -1
     LR: 1e-3
     WD: 1e-6

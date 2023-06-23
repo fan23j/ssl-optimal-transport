@@ -13,6 +13,7 @@ from config import cfg, update_config
 from datasets.dataset_factory import get_dataset
 from model.model import create_model, save_model, load_model
 from train.train_factory import train_factory
+from train.scheduler_factory import OptimizerSchedulerFactory
 
 
 def parse_args():
@@ -50,31 +51,25 @@ def main(cfg, local_rank):
     else:
         device = torch.device("cuda")
 
-    # set up optimizer
-    if cfg.TRAIN.OPTIMIZER == "adam":
-        optimizer = torch.optim.Adam(
-            model.parameters(), lr=cfg.TRAIN.LR, weight_decay=cfg.TRAIN.WD
-        )
-    elif cfg.TRAIN.OPTIMIZER == "adamw":
-        optimizer = torch.optim.AdamW(model.parameters(), cfg.TRAIN.LR)
-    elif cfg.TRAIN.OPTIMIZER == "sgd":
-        optimizer = torch.optim.SGD(
-            model.parameters(), lr=cfg.TRAIN.LR, momentum=cfg.TRAIN.MOMENTUM
-        )
-    else:
-        NotImplementedError
+    # set up optimizer and scheduler
+    scheduler_factory = OptimizerSchedulerFactory(cfg, model)
+    optimizer, lr_scheduler = scheduler_factory.create()
 
     # load in pretrained weights if applicable
     start_epoch = 0
     if cfg.MODEL.INIT_WEIGHTS:
         print("load pretrained model from {}".format(cfg.MODEL.PRETRAINED))
-        model, optimizer, start_epoch = load_model(
-            cfg.MODEL.PRETRAINED, model, optimizer
+        model, optimizer, lr_scheduler, start_epoch = load_model(
+            cfg.MODEL.PRETRAINED,
+            model,
+            optimizer,
+            lr_scheduler,
+            resume=cfg.TRAIN.RESUME,
         )
 
     # set up trainer code from train_factory
     Trainer = train_factory[cfg.TASK]
-    trainer = Trainer(cfg, model, optimizer)
+    trainer = Trainer(cfg, model, optimizer=optimizer, lr_scheduler=lr_scheduler)
 
     if cfg.TRAIN.MASTER_BATCH_SIZE == -1:
         master_batch_size = cfg.TRAIN.BATCH_SIZE // len(cfg.GPUS)
@@ -137,6 +132,7 @@ def main(cfg, local_rank):
                 epoch,
                 model,
                 optimizer,
+                lr_scheduler,
             )
             with torch.no_grad():
                 log_dict_val = trainer.val(epoch, val_loader)
@@ -147,6 +143,7 @@ def main(cfg, local_rank):
                     epoch,
                     model,
                     optimizer,
+                    lr_scheduler,
                 )
         else:
             save_model(
@@ -154,6 +151,7 @@ def main(cfg, local_rank):
                 epoch,
                 model,
                 optimizer,
+                lr_scheduler,
             )
             if epoch % 25 == 0:
                 save_model(
@@ -163,6 +161,7 @@ def main(cfg, local_rank):
                     epoch,
                     model,
                     optimizer,
+                    lr_scheduler,
                 )
             log_dict_val = {}  # create an empty log_dict_val for non-validation epochs
 
