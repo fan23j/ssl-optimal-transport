@@ -18,8 +18,8 @@ CUDNN:
     BENCHMARK: true
 
 MODEL:
-    INIT_WEIGHTS: false
-    PRETRAINED: ""
+    INIT_WEIGHTS: true
+    PRETRAINED: "/home/main/ssl-optimal-transport/runs/pretrain/mae_cifar10_mse/model_last.pth"
     NUM_CLASSES: 10
     NAME: "vit_tiny"
     HEAD_NAME: "mae_decode"
@@ -51,7 +51,7 @@ TRAIN:
     LOCAL_RANK: 0
     HIDE_DATA_TIME: false
     SAVE_ALL_MODEL: false
-    RESUME: false
+    RESUME: true
     EPOCHS: 2000
     NUM_ITERS: -1
     LR: 1.5e-4

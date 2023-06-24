@@ -49,12 +49,12 @@ def load_model(out, model, optimizer, lr_scheduler, resume=False, strict=False):
     model.load_state_dict(checkpoint_model, strict=strict)
     epoch = 0
     if resume:
+        epoch = checkpoint["epoch"]
+        print("resuming training from epoch {}".format(epoch))
         print("load optimizer from {}".format(out))
         optimizer.load_state_dict(checkpoint["optimizer"])
         print("load lr_scheduler from epoch {}".format(epoch))
         lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])
-        epoch = checkpoint["epoch"]
-        print("resuming training from epoch {}".format(epoch))
     return model, optimizer, lr_scheduler, epoch
 
 
