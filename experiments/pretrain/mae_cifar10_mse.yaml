@@ -20,9 +20,8 @@ CUDNN:
 MODEL:
     INIT_WEIGHTS: true
     PRETRAINED: "/home/main/ssl-optimal-transport/runs/pretrain/mae_cifar10_mse/model_last.pth"
-    NUM_CLASSES: 10
     NAME: "vit_tiny"
-    HEAD_NAME: "mae_decode"
+    HEADS: ["mae_decode"]
     INPUT_H: 32
     INPUT_W: 32
     MAE_EMBED_DIM: 192
@@ -44,6 +43,7 @@ DATASET:
     TEST_SET: "valid"
     IMAGE_SIZE: 32
     USE_TEST_AUG: True
+    NUM_CLASSES: 10
 
 TRAIN:
     OPTIMIZER: "adamw"

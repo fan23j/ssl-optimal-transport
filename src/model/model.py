@@ -11,6 +11,7 @@ from .heads.projection_head import ProjectionHead
 from .heads.linear_classifier_head import LinearClassifierHead
 from .heads.mae_decoder_head import MAEDecoderHead
 from .heads.none_head import NoneHead
+from .heads.vit_classifier_head import ViTClassifierHead
 
 _backbone_factory = {
     "resnet50": get_resnet50,
@@ -21,6 +22,7 @@ _head_factory = {
     "projection": ProjectionHead,
     "linear": LinearClassifierHead,
     "mae_decode": MAEDecoderHead,
+    "vit_classifier": ViTClassifierHead,
     "none": NoneHead,
 }
 
@@ -30,12 +32,14 @@ class BackBone(nn.Module):
         super(BackBone, self).__init__()
         backbone = _backbone_factory[arch]
         self.backbone_model = backbone(cfg=cfg)
-        head = _head_factory[cfg.MODEL.HEAD_NAME]
-        self.head = head(cfg)
+        self.heads = nn.ModuleList(
+            [_head_factory[head_name](cfg) for head_name in cfg.MODEL.HEADS]
+        )
 
     def forward(self, x):
         x = self.backbone_model(x)
-        x = self.head(x)
+        for head in self.heads:
+            x = head(x)
         return x
 
 
@@ -43,12 +47,17 @@ def create_model(arch, cfg):
     return BackBone(arch, cfg)
 
 
-def load_model(out, model, optimizer, lr_scheduler, resume=False, strict=False):
-    checkpoint = torch.load(out)
-    checkpoint_model = torch.load(out, map_location="cpu")["state_dict"]
+def load_model(cfg, model, optimizer, lr_scheduler, strict=False):
+    checkpoint = torch.load(cfg.MODEL.PRETRAINED)
+    checkpoint_model = torch.load(cfg.MODEL.PRETRAINED, map_location="cpu")[
+        "state_dict"
+    ]
+    checkpoint_model = {
+        k: v for k, v in checkpoint_model.items() if k not in cfg.MODEL.UNWANTED_KEYS
+    }
     model.load_state_dict(checkpoint_model, strict=strict)
     epoch = 0
-    if resume:
+    if cfg.TRAIN.RESUME:
         epoch = checkpoint["epoch"]
         print("resuming training from epoch {}".format(epoch))
         print("load optimizer from {}".format(out))

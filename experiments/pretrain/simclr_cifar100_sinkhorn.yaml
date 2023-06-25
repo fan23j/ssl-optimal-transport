@@ -20,9 +20,8 @@ CUDNN:
 MODEL:
     INIT_WEIGHTS: false
     PRETRAINED: ""
-    NUM_CLASSES: 100
     NAME: "resnet50"
-    HEAD_NAME: "projection"
+    HEADS: ["projection"]
     INPUT_H: 32
     INPUT_W: 32
 

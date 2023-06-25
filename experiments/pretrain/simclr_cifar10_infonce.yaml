@@ -20,10 +20,9 @@ CUDNN:
 MODEL:
     INIT_WEIGHTS: false
     PRETRAINED: "/data/pretrained_models/imagenet/hrnet_w32-36af842e.pth"
-    NUM_CLASSES: 1
     FEATURE_DIM: 128
     NAME: "resnet50"
-    HEAD_NAME: "projection"
+    HEADS: ["projection"]
     INPUT_H: 32
     INPUT_W: 32
 

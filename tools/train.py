@@ -34,7 +34,6 @@ def main(cfg, local_rank):
 
     print("Creating model...")
     model = create_model(cfg.MODEL.NAME, cfg)
-
     # create weights output directory
     if not os.path.exists(os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID)):
         os.makedirs(os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID))
@@ -60,11 +59,10 @@ def main(cfg, local_rank):
     if cfg.MODEL.INIT_WEIGHTS:
         print("load pretrained model from {}".format(cfg.MODEL.PRETRAINED))
         model, optimizer, lr_scheduler, start_epoch = load_model(
-            cfg.MODEL.PRETRAINED,
+            cfg,
             model,
             optimizer,
             lr_scheduler,
-            resume=cfg.TRAIN.RESUME,
         )
 
     # set up trainer code from train_factory
