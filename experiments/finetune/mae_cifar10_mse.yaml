@@ -47,7 +47,7 @@ DATASET:
     IMAGE_SIZE: 32
 
 TRAIN:
-    OPTIMIZER: "adam"
+    OPTIMIZER: "adamw"
     DISTRIBUTE: false
     LOCAL_RANK: 0
     HIDE_DATA_TIME: false

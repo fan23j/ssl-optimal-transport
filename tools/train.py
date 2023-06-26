@@ -9,6 +9,7 @@ import torch.distributed as dist
 import torch.utils.data
 
 import _init_paths
+from logger import Logger
 from config import cfg, update_config
 from datasets.dataset_factory import get_dataset
 from model.model import create_model, save_model, load_model
@@ -49,6 +50,9 @@ def main(cfg, local_rank):
         )
     else:
         device = torch.device("cuda")
+
+    # set up logger
+    logger = Logger(cfg)
 
     # set up optimizer and scheduler
     scheduler_factory = OptimizerSchedulerFactory(cfg, model)
@@ -122,7 +126,10 @@ def main(cfg, local_rank):
 
         # run training script
         log_dict_train = trainer.train(epoch, train_loader)
-
+        logger.write("epoch: {} |".format(epoch))
+        for k, v in log_dict_train.items():
+            logger.scalar_summary("train_{}".format(k), v, epoch)
+            logger.write("{} {:8f} | ".format(k, v))
         # run validation script
         if cfg.TRAIN.VAL_INTERVALS > 0 and epoch % cfg.TRAIN.VAL_INTERVALS == 0:
             save_model(
@@ -134,6 +141,12 @@ def main(cfg, local_rank):
             )
             with torch.no_grad():
                 log_dict_val = trainer.val(epoch, val_loader)
+            for k, v in log_dict_val.items():
+                try:
+                    logger.scalar_summary("val_{}".format(k), v, epoch)
+                    logger.write("{} {:8f} | ".format(k, v))
+                except:
+                    logger.write_image(k, v, epoch)
             if log_dict_val["ACC@1"] > best:
                 best = log_dict_val["ACC@1"]
                 save_model(
@@ -162,19 +175,11 @@ def main(cfg, local_rank):
                     lr_scheduler,
                 )
             log_dict_val = {}  # create an empty log_dict_val for non-validation epochs
+        logger.write("\n")
 
-        # prepare data row for CSV
-        data_row = {"epoch": epoch, **log_dict_train, **log_dict_val}
-
-        # write to CSV
-        with open(log_file, mode="a") as file:
-            writer = csv.DictWriter(file, fieldnames=data_row.keys())
-            if not header_prepared:
-                writer.writeheader()
-                header_prepared = True
-            writer.writerow(data_row)
     if cfg.TRAIN.VAL_INTERVALS > 0:
         print("Best ACC@1: ", best)
+    logger.close()
 
 
 if __name__ == "__main__":

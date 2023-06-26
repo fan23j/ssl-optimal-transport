@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=0 python3 test.py --cfg ../experiments/finetune/simclr_cifar10_infonce.yaml 
+CUDA_VISIBLE_DEVICES=0 python3 test.py --cfg ../experiments/pretrain/mae_cifar10_mse.yaml 

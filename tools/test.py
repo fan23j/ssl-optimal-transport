@@ -60,7 +60,7 @@ def main(cfg, local_rank):
 
     # set up trainer code from train_factory
     Trainer = train_factory[cfg.TEST.TASK]
-    trainer = Trainer(cfg, model, optimizer=optimizer)
+    trainer = Trainer(cfg, model, optimizer=optimizer, lr_scheduler=None)
 
     trainer.set_device(device)
 
@@ -83,13 +83,13 @@ def main(cfg, local_rank):
         results = trainer.test(val_loader)
 
     out_path = os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, cfg.TEST.OUTPUT_FILE)
-    
-    # Write the predictions and actual labels to a file
-    with open(out_path, 'w') as f:
-        for label, prediction in results:
-            f.write(f"{label}, {prediction}\n")
 
-    print(f"Predictions written to {out_path}")
+    # Write the predictions and actual labels to a file
+    # with open(out_path, "w") as f:
+    #     for label, prediction in results:
+    #         f.write(f"{label}, {prediction}\n")
+
+    # print(f"Predictions written to {out_path}")
 
 
 if __name__ == "__main__":

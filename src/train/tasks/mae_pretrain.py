@@ -1,5 +1,8 @@
 import torch
 from tqdm import tqdm
+from einops import rearrange
+from torch.utils.tensorboard import SummaryWriter
+import os
 
 from ..base_trainer import BaseTrainer
 
@@ -10,6 +13,7 @@ class MAEPreTrainer(BaseTrainer):
         # 4096 batch size to achieve SOTA in original paper
         self.steps_per_update = 4096 // cfg.TRAIN.BATCH_SIZE
         self.step_count = 0
+        self.writer = SummaryWriter(os.path.join("logs", "cifar10", "mae-pretrain"))
 
     def train(self, epoch, data_loader):
         self.model.train()
@@ -48,3 +52,15 @@ class MAEPreTrainer(BaseTrainer):
             average_loss_states[k] /= len(data_loader)
 
         return average_loss_states
+
+    def val(self, epoch, data_loader):
+        """visualize the first 16 predicted images on val dataset"""
+        self.model.eval()
+        with torch.no_grad():
+            val_img = next(iter(data_loader))["out_1"].to("cuda")
+            predicted_val_img, mask = self.model(val_img)
+            predicted_val_img = predicted_val_img * mask + val_img * (1 - mask)
+            img = torch.cat([val_img * (1 - mask), predicted_val_img, val_img], dim=0)
+            img = rearrange(img, "(v h1 w1) c h w -> c (h1 h) (w1 v w)", w1=2, v=3)
+
+        return {"imgs": (img + 1) / 2, "ACC@1": 0}

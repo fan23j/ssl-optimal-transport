@@ -18,8 +18,8 @@ CUDNN:
     BENCHMARK: true
 
 MODEL:
-    INIT_WEIGHTS: true
-    PRETRAINED: "/home/main/ssl-optimal-transport/runs/pretrain/mae_cifar10_mse/model_last.pth"
+    INIT_WEIGHTS: false
+    PRETRAINED: ""
     NAME: "vit_tiny"
     HEADS: ["mae_decode"]
     INPUT_H: 32
@@ -39,6 +39,7 @@ LOSS:
 
 DATASET:
     DATASET: "CIFAR10"
+    SAMPLE: "MAE"
     TRAIN_SET: "train"
     TEST_SET: "valid"
     IMAGE_SIZE: 32
@@ -51,7 +52,7 @@ TRAIN:
     LOCAL_RANK: 0
     HIDE_DATA_TIME: false
     SAVE_ALL_MODEL: false
-    RESUME: true
+    RESUME: false
     EPOCHS: 2000
     NUM_ITERS: -1
     LR: 1.5e-4
@@ -61,5 +62,10 @@ TRAIN:
 
     CHECKPOINT: ""
     SHUFFLE: true
-    VAL_INTERVALS: 0
+    VAL_INTERVALS: 50
     TRAINVAL: false
+
+TEST:
+    BATCH_SIZE: 16
+    TASK: "mae_pretrain"
+    MODEL_PATH: "/home/main/ssl-optimal-transport/runs/pretrain/mae_cifar10_mse/model_last.pth"
