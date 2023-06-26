@@ -39,6 +39,7 @@ LOSS:
 
 DATASET:
     DATASET: "CIFAR10"
+    SAMPLE: "MAE"
     TRAIN_SET: "train"
     TEST_SET: "valid"
     NUM_CLASSES: 10
@@ -61,5 +62,5 @@ TRAIN:
 
     CHECKPOINT: ""
     SHUFFLE: true
-    VAL_INTERVALS: 0
+    VAL_INTERVALS: 1
     TRAINVAL: false
