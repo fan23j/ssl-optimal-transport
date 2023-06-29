@@ -5,6 +5,7 @@ from .criterion.sinkhorn import Sinkhorn_Loss
 from .criterion.gromov_wasserstein.gromov_wasserstein import Gromov_Wasserstein_Loss
 from .criterion.cross_entropy import Cross_Entropy_Loss
 from .criterion.mae_mse import Mae_MSE_Loss
+from .criterion.cluster_assignment import Cluster_Assignment_Loss
 
 _loss_factory = {
     "infonce": Info_NCE_Loss,
@@ -12,6 +13,7 @@ _loss_factory = {
     "gromov_wasserstein": Gromov_Wasserstein_Loss,
     "cross_entropy": Cross_Entropy_Loss,
     "mae_mse": Mae_MSE_Loss,
+    "cluster_assignment": Cluster_Assignment_Loss,
 }
 
 
