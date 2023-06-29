@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import argparse
 import os
-import csv
+import apex
 
 import torch
 import torch.distributed as dist
@@ -54,38 +54,6 @@ def main(cfg, local_rank):
     # set up logger
     logger = Logger(cfg)
 
-    # set up optimizer and scheduler
-    scheduler_factory = OptimizerSchedulerFactory(cfg, model)
-    optimizer, lr_scheduler = scheduler_factory.create()
-
-    # load in pretrained weights if applicable
-    start_epoch = 0
-    if cfg.MODEL.INIT_WEIGHTS:
-        print("load pretrained model from {}".format(cfg.MODEL.PRETRAINED))
-        model, optimizer, lr_scheduler, start_epoch = load_model(
-            cfg,
-            model,
-            optimizer,
-            lr_scheduler,
-        )
-
-    # set up trainer code from train_factory
-    Trainer = train_factory[cfg.TASK]
-    trainer = Trainer(cfg, model, optimizer=optimizer, lr_scheduler=lr_scheduler)
-
-    if cfg.TRAIN.MASTER_BATCH_SIZE == -1:
-        master_batch_size = cfg.TRAIN.BATCH_SIZE // len(cfg.GPUS)
-    else:
-        master_batch_size = cfg.TRAIN.MASTER_BATCH_SIZE
-    rest_batch_size = cfg.TRAIN.BATCH_SIZE - master_batch_size
-    chunk_sizes = [cfg.TRAIN.MASTER_BATCH_SIZE]
-    for i in range(len(cfg.GPUS) - 1):
-        slave_chunk_size = rest_batch_size // (len(cfg.GPUS) - 1)
-        if i < rest_batch_size % (len(cfg.GPUS) - 1):
-            slave_chunk_size += 1
-        chunk_sizes.append(slave_chunk_size)
-    trainer.set_device(device)
-
     # load in dataset
     print("Setting up data...")
     train_dataset, val_dataset = get_dataset(cfg)
@@ -115,9 +83,44 @@ def main(cfg, local_rank):
         sampler=train_sampler if cfg.TRAIN.DISTRIBUTE else None,
     )
 
+    # set up optimizer and scheduler
+    scheduler_factory = OptimizerSchedulerFactory(cfg, model, train_loader)
+    optimizer, lr_scheduler = scheduler_factory.create()
+
+    # load in pretrained weights if applicable
+    start_epoch = 0
+    if cfg.MODEL.INIT_WEIGHTS:
+        print("load pretrained model from {}".format(cfg.MODEL.PRETRAINED))
+        model, optimizer, lr_scheduler, start_epoch = load_model(
+            cfg,
+            model,
+            optimizer,
+            lr_scheduler,
+        )
+
+    # init mixed precision
+    if cfg.USE_MIXED_PRECISION:
+        model, optimizer = apex.amp.initialize(model, optimizer, opt_level="O1")
+        logger.info("Initializing mixed precision done.")
+
+    # set up trainer code from train_factory
+    Trainer = train_factory[cfg.TASK]
+    trainer = Trainer(cfg, model, optimizer=optimizer, lr_scheduler=lr_scheduler)
+
+    if cfg.TRAIN.MASTER_BATCH_SIZE == -1:
+        master_batch_size = cfg.TRAIN.BATCH_SIZE // len(cfg.GPUS)
+    else:
+        master_batch_size = cfg.TRAIN.MASTER_BATCH_SIZE
+    rest_batch_size = cfg.TRAIN.BATCH_SIZE - master_batch_size
+    chunk_sizes = [cfg.TRAIN.MASTER_BATCH_SIZE]
+    for i in range(len(cfg.GPUS) - 1):
+        slave_chunk_size = rest_batch_size // (len(cfg.GPUS) - 1)
+        if i < rest_batch_size % (len(cfg.GPUS) - 1):
+            slave_chunk_size += 1
+        chunk_sizes.append(slave_chunk_size)
+    trainer.set_device(device)
+
     print("Starting training...")
-    log_file = os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, "log.csv")
-    header_prepared = False
     best = 0.0
 
     for epoch in range(start_epoch + 1, cfg.TRAIN.EPOCHS + 1):
