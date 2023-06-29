@@ -1,5 +1,8 @@
 from .dataset.cifar10 import CIFAR10
 from .dataset.cifar100 import CIFAR100
+from .dataset.LT_cifar10 import LongTailCIFAR10
+from .dataset.LT_cifar100 import LongTailCIFAR100
+from .dataset.multi_crop_dataset import MultiCropDataset
 
 from .sample.mae import MaeSampler
 from .sample.simclr import SimCLRSampler
@@ -8,11 +11,15 @@ from .sample.simclr import SimCLRSampler
 _dataset_factory = {
     "CIFAR10": CIFAR10,
     "CIFAR100": CIFAR100,
+    "LT_CIFAR10": LongTailCIFAR10,
+    "LT_CIFAR100": LongTailCIFAR100,
+    "MULTICROP": MultiCropDataset,
 }
 
 _sample_factory = {
     "SIMCLR": SimCLRSampler,
     "MAE": MaeSampler,
+    "NONE": None,
 }
 
 
