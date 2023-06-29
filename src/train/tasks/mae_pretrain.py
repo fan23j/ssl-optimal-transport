@@ -1,8 +1,6 @@
 import torch
 from tqdm import tqdm
 from einops import rearrange
-from torch.utils.tensorboard import SummaryWriter
-import os
 
 from ..base_trainer import BaseTrainer
 
@@ -13,7 +11,6 @@ class MAEPreTrainer(BaseTrainer):
         # 4096 batch size to achieve SOTA in original paper
         self.steps_per_update = 4096 // cfg.TRAIN.BATCH_SIZE
         self.step_count = 0
-        self.writer = SummaryWriter(os.path.join("logs", "cifar10", "mae-pretrain"))
 
     def train(self, epoch, data_loader):
         self.model.train()

@@ -16,7 +16,12 @@ class OptimizerSchedulerFactory:
             )
             lr_func = lambda epoch: 1
         elif self.cfg.TRAIN.OPTIMIZER == "adamw":
-            optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.cfg.TRAIN.LR)
+            optimizer = torch.optim.AdamW(
+                self.model.parameters(),
+                lr=self.cfg.TRAIN.LR * self.cfg.TRAIN.BATCH_SIZE / 256,
+                betas=(0.9, 0.95),
+                weight_decay=self.cfg.TRAIN.WD,
+            )
             lr_func = lambda epoch: min(
                 (epoch + 1) / (self.cfg.TRAIN.WARMUP_EPOCHS + 1e-8),
                 0.5 * (math.cos(epoch / self.cfg.TRAIN.EPOCHS * math.pi) + 1),
