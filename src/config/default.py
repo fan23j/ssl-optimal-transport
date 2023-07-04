@@ -51,6 +51,8 @@ _C.MODEL.MAE_DECODER_NUM_HEADS = 3
 _C.MODEL.MAE_MASK_RATIO = 0.75
 # swav params
 _C.MODEL.NMB_PROTOTYPES = 100
+# classify anything
+_C.MODEL.WORD2VEC = ""
 
 _C.LOSS = CN()
 _C.LOSS.METRIC = ["loss"]

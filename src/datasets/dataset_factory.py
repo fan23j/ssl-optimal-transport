@@ -3,9 +3,11 @@ from .dataset.cifar100 import CIFAR100
 from .dataset.LT_cifar10 import LongTailCIFAR10
 from .dataset.LT_cifar100 import LongTailCIFAR100
 from .dataset.multi_crop_dataset import MultiCropDataset
+from .dataset.LT_imagenet.LT_imagenet import LT_Imagenet
 
 from .sample.mae import MaeSampler
 from .sample.simclr import SimCLRSampler
+from .sample.classify_anything import ClassifyAnythingSampler
 
 
 _dataset_factory = {
@@ -14,11 +16,13 @@ _dataset_factory = {
     "LT_CIFAR10": LongTailCIFAR10,
     "LT_CIFAR100": LongTailCIFAR100,
     "MULTICROP": MultiCropDataset,
+    "LT_IMAGENET": LT_Imagenet,
 }
 
 _sample_factory = {
     "SIMCLR": SimCLRSampler,
     "MAE": MaeSampler,
+    "CLASSIFY_ANYTHING": ClassifyAnythingSampler,
     "NONE": None,
 }
 
@@ -32,82 +36,3 @@ def get_dataset(cfg):
         dataset(cfg, cfg.DATA_DIR, train=True, download=True, sampler=sampler),
         dataset(cfg, cfg.DATA_DIR, train=False, download=True, sampler=sampler),
     )
-
-
-# def get_dataset(cfg):
-#     transforms = Transforms(cfg)
-#     train_transform, test_transform = transforms()
-#     if cfg.DATASET.DATASET == "STL10":
-#         train_dataset = torchvision.datasets.STL10(
-#             cfg.DATA_DIR,
-#             split="train",
-#             download=True,
-#             transform=train_transform,
-#         )
-#         test_dataset = torchvision.datasets.STL10(
-#             cfg.DATA_DIR,
-#             split="test",
-#             download=True,
-#             transform=test_transform,
-#         )
-#     elif cfg.DATASET.DATASET == "CIFAR10":
-#         train_dataset = CIFAR10(
-#             cfg.DATA_DIR,
-#             train=True,
-#             download=True,
-#             transform=train_transform,
-#         )
-#         test_dataset = CIFAR10(
-#             cfg.DATA_DIR,
-#             train=False,
-#             download=True,
-#             transform=test_transform,
-#         )
-#     elif cfg.DATASET.DATASET == "CIFAR100":
-#         train_dataset = CIFAR100(
-#             cfg.DATA_DIR,
-#             train=True,
-#             download=True,
-#             transform=train_transform,
-#         )
-#         test_dataset = CIFAR100(
-#             cfg.DATA_DIR,
-#             train=False,
-#             download=True,
-#             transform=test_transform,
-#         )
-#     elif cfg.DATASET.DATASET == "SVHN":
-#         train_dataset = torchvision.datasets.SVHN(
-#             cfg.DATA_DIR,
-#             split="train",
-#             download=True,
-#             transform=train_transform,
-#         )
-#         test_dataset = torchvision.datasets.SVHN(
-#             cfg.DATA_DIR,
-#             split="test",
-#             download=True,
-#             transform=test_transform,
-#         )
-#     elif cfg.DATASET.DATASET == "ImageNet100":
-#         train_dataset = torchvision.datasets.ImageFolder(
-#             "/mnt/nas/dataset_share/imagenet100/train",
-#             transform=train_transform,
-#         )
-#         test_dataset = torchvision.datasets.ImageFolder(
-#             "/mnt/nas/dataset_share/imagenet100/val",
-#             transform=test_transform,
-#         )
-#     elif cfg.DATASET.DATASET == "ImageNet1k":
-#         train_dataset = torchvision.datasets.ImageFolder(
-#             "/mnt/nas/dataset_share/imagenet/train",
-#             transform=train_transform,
-#         )
-#         test_dataset = torchvision.datasets.ImageFolder(
-#             "/mnt/nas/dataset_share/imagenet/val",
-#             transform=test_transform,
-#         )
-#     else:
-#         raise NotImplementedError
-
-#     return train_dataset, test_dataset
