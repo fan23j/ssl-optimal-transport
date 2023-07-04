@@ -5,8 +5,8 @@ from ..base_trainer import BaseTrainer
 
 
 class SimCLRPreTrainer(BaseTrainer):
-    def __init__(self, cfg, model, optimizer):
-        super(SimCLRPreTrainer, self).__init__(cfg, model, optimizer)
+    def __init__(self, cfg, model, optimizer, lr_scheduler):
+        super(SimCLRPreTrainer, self).__init__(cfg, model, optimizer, lr_scheduler)
 
     def train(self, epoch, data_loader):
         self.model.train()

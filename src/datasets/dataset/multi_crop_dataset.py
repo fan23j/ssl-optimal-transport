@@ -112,11 +112,12 @@ def get_color_distortion(s=1.0):
 
 
 def get_dataset_class(dataset_name):
-    if dataset_name.lower() == "CIFAR10":
+    return datasets.CIFAR10
+    if dataset_name == "CIFAR10":
         return datasets.CIFAR10
-    elif dataset_name.lower() == "CIFAR100":
+    elif dataset_name == "CIFAR100":
         return datasets.CIFAR100
-    elif dataset_name.lower() == "IMAGENET":
+    elif dataset_name == "IMAGENET":
         return datasets.ImageFolder
     else:
         raise ValueError(f"Invalid dataset name: {dataset_name}")

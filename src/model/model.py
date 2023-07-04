@@ -60,7 +60,7 @@ def load_model(cfg, model, optimizer, lr_scheduler, strict=False):
     if cfg.TRAIN.RESUME:
         epoch = checkpoint["epoch"]
         print("resuming training from epoch {}".format(epoch))
-        print("load optimizer from {}".format(out))
+        print("load optimizer from epoch {}".format(epoch))
         optimizer.load_state_dict(checkpoint["optimizer"])
         print("load lr_scheduler from epoch {}".format(epoch))
         lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])

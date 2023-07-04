@@ -13,6 +13,7 @@ from logger import Logger
 from config import cfg, update_config
 from datasets.dataset_factory import get_dataset
 from model.model import create_model, save_model, load_model
+from model.backbones.swav_resnet import resnet50
 from train.train_factory import train_factory
 from train.scheduler_factory import OptimizerSchedulerFactory
 
@@ -34,7 +35,13 @@ def main(cfg, local_rank):
     torch.backends.cudnn.benchmark = cfg.CUDNN.BENCHMARK
 
     print("Creating model...")
-    model = create_model(cfg.MODEL.NAME, cfg)
+    # model = create_model(cfg.MODEL.NAME, cfg)
+    model = resnet50(
+        normalize=True,
+        hidden_mlp=2048,
+        output_dim=128,
+        nmb_prototypes=100,
+    )
     # create weights output directory
     if not os.path.exists(os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID)):
         os.makedirs(os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID))
@@ -98,10 +105,11 @@ def main(cfg, local_rank):
             lr_scheduler,
         )
 
+    model.to("cuda")
     # init mixed precision
-    if cfg.USE_MIXED_PRECISION:
+    if cfg.TRAIN.USE_MIXED_PRECISION:
         model, optimizer = apex.amp.initialize(model, optimizer, opt_level="O1")
-        logger.info("Initializing mixed precision done.")
+        print("Initializing mixed precision done.")
 
     # set up trainer code from train_factory
     Trainer = train_factory[cfg.TASK]

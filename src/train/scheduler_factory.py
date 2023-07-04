@@ -50,7 +50,7 @@ class OptimizerSchedulerFactory:
             # Create the learning rate schedules for warmup and cosine annealing
             warmup_lr_schedule = np.linspace(
                 self.cfg.TRAIN.START_WARMUP,
-                self.cfg.TRAIN.BASE_LR,
+                self.cfg.TRAIN.LR,
                 len(self.train_loader) * self.cfg.TRAIN.WARMUP_EPOCHS,
             )
             iters = np.arange(
@@ -61,7 +61,7 @@ class OptimizerSchedulerFactory:
                 [
                     self.cfg.TRAIN.FINAL_LR
                     + 0.5
-                    * (self.cfg.TRAIN.BASE_LR - self.cfg.TRAIN.FINAL_LR)
+                    * (self.cfg.TRAIN_LR - self.cfg.TRAIN.FINAL_LR)
                     * (
                         1
                         + math.cos(

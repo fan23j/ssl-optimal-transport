@@ -1,0 +1,78 @@
+DATA_DIR: "/home/main/ssl-optimal-transport/data"
+EXP_ID: "swav_cifar10_base"
+TASK: "swav_pretrain"
+DEBUG: 0
+DEBUG_THEME: "white"
+SEED: 317
+OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/pretrain"
+LOG_DIR: ""
+EXPERIMENT_NAME: ""
+GPUS: [0, 1]
+WORKERS: 8
+PRINT_FREQ: 0
+PIN_MEMORY: true
+SAVE_RESULTS: true
+
+CUDNN:
+    BENCHMARK: true
+
+MODEL:
+    INIT_WEIGHTS: false
+    PRETRAINED: "/data/pretrained_models/imagenet/hrnet_w32-36af842e.pth"
+    FEATURE_DIM: 128
+    NAME: "resnet50"
+    HEADS: ["projection"]
+    INPUT_H: 32
+    INPUT_W: 32
+    HIDDEN_MLP: 2048
+
+LOSS:
+    METRIC: ["swav"]
+    TEMPERATURE: 0.1
+    SWAV_EPSILON: 0.03
+
+DATASET:
+    DATASET: "MULTICROP"
+    SAMPLE: "NONE"
+    TRAIN_SET: "train"
+    TEST_SET: "valid"
+    MULTICROP_SIZE_CROPS: [32]
+    MULTICROP_NMB_CROPS: [2]
+    MULTICROP_MIN_SCALE_CROPS: [0.14]
+    MULTICROP_MAX_SCALE_CROPS: [1.0]
+
+    # training data augmentation
+    MEAN: [0.4914, 0.4822, 0.4465]
+    STD: [0.2023, 0.1994, 0.2010]
+    COLOR_JITTER_STRENGTH: 0.5
+    IMAGE_SIZE: 32
+
+TRAIN:
+    OPTIMIZER: "adam"
+    DISTRIBUTE: false
+    LOCAL_RANK: 1
+    HIDE_DATA_TIME: false
+    SAVE_ALL_MODEL: false
+    RESUME: false
+    EPOCHS: 100
+    NUM_ITERS: -1
+    LR: 0.6
+    FINAL_LR: 0.0006
+    WD: 1e-6
+    BATCH_SIZE: 256
+    QUEUE_LENGTH: 256
+    EPOCH_QUEUE_START: 15
+    CROPS_FOR_ASSIGN: [0, 1]
+    FREEZE_PROTOTYPES_NITERS: 5005
+    WARMUP_EPOCHS: 5
+    USE_MIXED_PRECISION: True
+
+    CHECKPOINT: ""
+    SHUFFLE: true
+    VAL_INTERVALS: 0
+    TRAINVAL: false
+
+TEST:
+    # Test Model Epoch
+    MODEL_PATH: "/home/tensorboy/data/centerpose/model_zoo/mobilenetV3_1x.pth"
+    TASK: "simclr_linear"

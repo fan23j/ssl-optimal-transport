@@ -9,11 +9,16 @@ class ProjectionHead(nn.Module):
         super(ProjectionHead, self).__init__()
 
         self.head = nn.Sequential(
-            nn.Linear(2048, 512, bias=False),
-            nn.BatchNorm1d(512),
+            nn.Linear(2048, cfg.MODEL.HIDDEN_MLP, bias=False),
+            nn.BatchNorm1d(cfg.MODEL.HIDDEN_MLP),
             nn.ReLU(inplace=True),
-            nn.Linear(512, cfg.MODEL.FEATURE_DIM, bias=True),
+            nn.Linear(cfg.MODEL.HIDDEN_MLP, cfg.MODEL.FEATURE_DIM, bias=True),
         )
+
+        if cfg.MODEL.NMB_PROTOTYPES > 0:
+            self.prototypes = nn.Linear(
+                cfg.MODEL.FEATURE_DIM, cfg.MODEL.NMB_PROTOTYPES, bias=False
+            )
 
         self.init_weights()
 
@@ -29,4 +34,6 @@ class ProjectionHead(nn.Module):
 
     def forward(self, x):
         out = self.head(x)
+        if self.prototypes is not None:
+            return F.normalize(out, dim=-1), self.prototypes(out)
         return F.normalize(x, dim=-1), F.normalize(out, dim=-1)
