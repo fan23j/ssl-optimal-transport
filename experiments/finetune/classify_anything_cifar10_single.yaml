@@ -1,6 +1,6 @@
 DATA_DIR: "/home/main/ssl-optimal-transport/data"
 EXP_ID: "classify_anything_cifar10_single"
-TASK: "classify_anything_linear"
+TASK: "simclr_classify_anything"
 DEBUG: 0
 DEBUG_THEME: "white"
 SEED: 317
@@ -21,17 +21,20 @@ MODEL:
     INIT_WEIGHTS: true
     PRETRAINED: "/home/main/ssl-optimal-transport/runs/pretrain/simclr_cifar10_infonce/model_last.pth"
     NAME: "resnet50"
-    HEADS: ["linear"]
+    HEADS: ["projection", "reshape"]
     INPUT_H: 32
     INPUT_W: 32
     WORD2VEC: "/home/main/ssl-optimal-transport/weights/GoogleNews-vectors-negative300.bin.gz"
+    OUTPUT_FEATURES: 300
 
 LOSS:
     METRIC: ["classify_anything"]
     TEMPERATURE: 0.5
+    SINKHORN_MAX_ITER: 3
 
 DATASET:
     DATASET: "CIFAR10"
+    SAMPLE: "CLASSIFY_ANYTHING"
     TRAIN_SET: "train"
     TEST_SET: "valid"
     NUM_CLASSES: 10

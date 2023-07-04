@@ -6,8 +6,8 @@ from ..base_trainer import BaseTrainer
 
 
 class SimCLRLinearTrainer(BaseTrainer):
-    def __init__(self, cfg, model, optimizer):
-        super(SimCLRLinearTrainer, self).__init__(cfg, model, optimizer)
+    def __init__(self, cfg, model, optimizer, lr_scheduler):
+        super(SimCLRLinearTrainer, self).__init__(cfg, model, optimizer, lr_scheduler)
 
     def train(self, epoch, data_loader, is_train=True):
         self.model.train() if is_train else self.model.eval()
@@ -65,6 +65,7 @@ class SimCLRLinearTrainer(BaseTrainer):
                     )
                 )
 
+        self.lr_scheduler.step()
         # Average the accumulated loss_states
         for k in average_loss_states:
             average_loss_states[k] /= len(data_loader)
@@ -79,7 +80,12 @@ class SimCLRLinearTrainer(BaseTrainer):
 
     def test(self, data_loader):
         self.model.eval()
-        total_correct_1, total_correct_5, total_num, data_bar = 0.0, 0.0, 0, tqdm(data_loader)
+        total_correct_1, total_correct_5, total_num, data_bar = (
+            0.0,
+            0.0,
+            0,
+            tqdm(data_loader),
+        )
         predictions = []
         labels = []
         average_loss_states = {}
@@ -88,7 +94,9 @@ class SimCLRLinearTrainer(BaseTrainer):
             for batch in data_bar:
                 data = batch["out_1"]
                 target = batch["target"]
-                data, target = data.cuda(non_blocking=True), target.cuda(non_blocking=True)
+                data, target = data.cuda(non_blocking=True), target.cuda(
+                    non_blocking=True
+                )
 
                 out = self.model(data)
                 _, predicted = torch.max(out.data, 1)
@@ -127,5 +135,3 @@ class SimCLRLinearTrainer(BaseTrainer):
                 )
 
         return zip(labels, predictions)
-
-

@@ -43,7 +43,7 @@ class SimCLRPreTrainer(BaseTrainer):
                     epoch, self.cfg.TRAIN.EPOCHS, loss_state_str
                 )
             )
-
+        self.lr_scheduler.step()
         # Average the accumulated loss_states
         for k in average_loss_states:
             average_loss_states[k] /= len(data_loader)

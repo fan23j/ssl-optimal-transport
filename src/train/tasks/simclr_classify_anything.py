@@ -6,10 +6,13 @@ from ..base_trainer import BaseTrainer
 
 
 class SimCLRClassifyAnythingTrainer(BaseTrainer):
-    def __init__(self, cfg, model, optimizer):
-        super(SimCLRClassifyAnythingTrainer, self).__init__(cfg, model, optimizer)
+    def __init__(self, cfg, model, optimizer, lr_scheduler):
+        super(SimCLRClassifyAnythingTrainer, self).__init__(
+            cfg, model, optimizer, lr_scheduler
+        )
+        print("load word2vec model from " + cfg.MODEL.WORD2VEC)
         self.word2vec = KeyedVectors.load_word2vec_format(
-            cfg.MODEL.WORD2VEC, binary=False
+            cfg.MODEL.WORD2VEC, binary=True
         )
 
     def train(self, epoch, data_loader, is_train=True):
@@ -27,7 +30,7 @@ class SimCLRClassifyAnythingTrainer(BaseTrainer):
                 data = batch["out_1"]
                 target = batch["target"]
                 label = batch["label"]
-                label_vector = self.word2vec.wv[label]
+                label_vector = torch.from_numpy(self.word2vec[label])
                 data, target, label_vector = (
                     data.cuda(non_blocking=True),
                     target.cuda(non_blocking=True),
@@ -72,7 +75,7 @@ class SimCLRClassifyAnythingTrainer(BaseTrainer):
                         total_correct_5 / total_num * 100,
                     )
                 )
-
+        self.lr_scheduler.step()
         # Average the accumulated loss_states
         for k in average_loss_states:
             average_loss_states[k] /= len(data_loader)

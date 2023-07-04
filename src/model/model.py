@@ -12,6 +12,7 @@ from .heads.linear_classifier_head import LinearClassifierHead
 from .heads.mae_decoder_head import MAEDecoderHead
 from .heads.none_head import NoneHead
 from .heads.vit_classifier_head import ViTClassifierHead
+from .heads.reshape_head import ReshapeHead
 
 _backbone_factory = {
     "resnet50": get_resnet50,
@@ -23,6 +24,7 @@ _head_factory = {
     "linear": LinearClassifierHead,
     "mae_decode": MAEDecoderHead,
     "vit_classifier": ViTClassifierHead,
+    "reshape": ReshapeHead,
     "none": NoneHead,
 }
 
@@ -49,13 +51,13 @@ def create_model(arch, cfg):
 
 def load_model(cfg, model, optimizer, lr_scheduler, strict=False):
     checkpoint = torch.load(cfg.MODEL.PRETRAINED)
-    checkpoint_model = torch.load(cfg.MODEL.PRETRAINED, map_location="cpu")[
-        "state_dict"
-    ]
-    checkpoint_model = {
-        k: v for k, v in checkpoint_model.items() if k not in cfg.MODEL.UNWANTED_KEYS
-    }
-    model.load_state_dict(checkpoint_model, strict=strict)
+    # checkpoint_model = torch.load(cfg.MODEL.PRETRAINED, map_location="cpu")[
+    #     "state_dict"
+    # ]
+    # checkpoint_model = {
+    #     k: v for k, v in checkpoint_model.items() if k not in cfg.MODEL.UNWANTED_KEYS
+    # }
+    model.load_state_dict(checkpoint, strict=strict)
     epoch = 0
     if cfg.TRAIN.RESUME:
         epoch = checkpoint["epoch"]

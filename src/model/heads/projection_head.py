@@ -15,10 +15,11 @@ class ProjectionHead(nn.Module):
             nn.Linear(cfg.MODEL.HIDDEN_MLP, cfg.MODEL.FEATURE_DIM, bias=True),
         )
 
-        if cfg.MODEL.NMB_PROTOTYPES > 0:
-            self.prototypes = nn.Linear(
-                cfg.MODEL.FEATURE_DIM, cfg.MODEL.NMB_PROTOTYPES, bias=False
-            )
+        self.prototypes = (
+            nn.Linear(cfg.MODEL.FEATURE_DIM, cfg.MODEL.NMB_PROTOTYPES, bias=False)
+            if cfg.MODEL.NMB_PROTOTYPES > 0
+            else None
+        )
 
         self.init_weights()
 
