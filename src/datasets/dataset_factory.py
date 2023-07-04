@@ -7,6 +7,7 @@ from .dataset.LT_imagenet.LT_imagenet import LT_Imagenet
 
 from .sample.mae import MaeSampler
 from .sample.simclr import SimCLRSampler
+from .sample.classify_anything import ClassifyAnythingSampler
 
 
 _dataset_factory = {
@@ -21,6 +22,7 @@ _dataset_factory = {
 _sample_factory = {
     "SIMCLR": SimCLRSampler,
     "MAE": MaeSampler,
+    "CLASSIFY_ANYTHING": ClassifyAnythingSampler,
     "NONE": None,
 }
 
