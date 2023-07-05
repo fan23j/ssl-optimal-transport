@@ -1,8 +1,25 @@
 import torch
+import torch.nn as nn
+import matplotlib.pyplot as plt
+import numpy as np
+
 from tqdm import tqdm
 from gensim.models import KeyedVectors
 
 from ..base_trainer import BaseTrainer
+
+
+def get_word_vector(word, word2vec):
+    # Check if the word is in the vocabulary
+    if word in word2vec.key_to_index:
+        return word2vec[word]
+    # If the word is not in the vocab, treat it as a compound word
+    else:
+        words = word.split("_")
+        word_vecs = [word2vec[w] for w in words if w in word2vec.key_to_index]
+        if not word_vecs:
+            raise ValueError(f"None of the words in {word} are in the vocabulary.")
+        return np.mean(word_vecs, axis=0)
 
 
 class SimCLRClassifyAnythingTrainer(BaseTrainer):
@@ -14,6 +31,19 @@ class SimCLRClassifyAnythingTrainer(BaseTrainer):
         self.word2vec = KeyedVectors.load_word2vec_format(
             cfg.MODEL.WORD2VEC, binary=True
         )
+        print("constructing labels vector...")
+        self.label_vectors = np.zeros(
+            (len(cfg.DATASET.LABELS), cfg.MODEL.OUTPUT_FEATURES)
+        )
+        for i, label in enumerate(cfg.DATASET.LABELS):
+            try:
+                self.label_vectors[i, :] = get_word_vector(label, self.word2vec)
+            except ValueError as e:
+                print(e)
+        with torch.no_grad():
+            self.label_vectors = (
+                torch.tensor(self.label_vectors).float().cuda(non_blocking=True)
+            )
 
     def train(self, epoch, data_loader, is_train=True):
         self.model.train() if is_train else self.model.eval()
@@ -24,26 +54,31 @@ class SimCLRClassifyAnythingTrainer(BaseTrainer):
             tqdm(data_loader),
         )
         average_loss_states = {}
+        figure = None
 
         with torch.enable_grad() if is_train else torch.no_grad():
-            for batch in data_bar:
+            for it, batch in enumerate(data_bar):
                 data = batch["out_1"]
                 target = batch["target"]
-                label = batch["label"]
-                label_vector = torch.from_numpy(self.word2vec[label])
-                data, target, label_vector = (
+                data, target = (
                     data.cuda(non_blocking=True),
                     target.cuda(non_blocking=True),
-                    label_vector.cuda(non_blocking=True),
                 )
-                out = self.model(data)
+                features = self.model(data)
 
-                loss, loss_states = self.loss(out, target, label_vector)
+                loss, loss_states, cosim_softmax = self.loss(
+                    features, self.label_vectors, target
+                )
 
                 if is_train:
                     self.optimizer.zero_grad()
                     loss.backward()
                     self.optimizer.step()
+                elif it == 0:
+                    # save cosim_softmax for first batch in val
+                    plt.imshow(cosim_softmax.cpu().detach().numpy(), cmap="viridis")
+                    plt.colorbar()
+                    figure = plt
 
                 total_num += data.size(0)
                 # Accumulate average_loss_states
@@ -57,7 +92,7 @@ class SimCLRClassifyAnythingTrainer(BaseTrainer):
                     f"{k}: {v:.4f}" for k, v in loss_states.items()
                 )
 
-                prediction = torch.argsort(out, dim=-1, descending=True)
+                prediction = torch.argsort(cosim_softmax, dim=-1, descending=True)
                 total_correct_1 += torch.sum(
                     (prediction[:, 0:1] == target.unsqueeze(dim=-1)).any(dim=-1).float()
                 ).item()
@@ -82,7 +117,8 @@ class SimCLRClassifyAnythingTrainer(BaseTrainer):
 
         average_loss_states["ACC@1"] = total_correct_1 / total_num * 100
         average_loss_states["ACC@5"] = total_correct_5 / total_num * 100
-
+        if not is_train:
+            average_loss_states["figure"] = figure
         return average_loss_states
 
     def val(self, epoch, test_data_loader):

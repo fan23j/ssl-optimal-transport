@@ -14,8 +14,10 @@ from config import cfg, update_config
 from datasets.dataset_factory import get_dataset
 from model.model import create_model, save_model, load_model
 from model.backbones.swav_resnet import resnet50
+from model.backbones.mae_vit import MAE_ViT
 from train.train_factory import train_factory
 from train.scheduler_factory import OptimizerSchedulerFactory
+from torchsummary import summary
 
 
 def parse_args():
@@ -36,12 +38,14 @@ def main(cfg, local_rank):
 
     print("Creating model...")
     model = create_model(cfg.MODEL.NAME, cfg)
+
     # model = resnet50(
     #     normalize=True,
     #     hidden_mlp=2048,
     #     output_dim=128,
     #     nmb_prototypes=100,
     # )
+    # model = MAE_ViT(mask_ratio=0.75).to("cuda")
     # create weights output directory
     if not os.path.exists(os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID)):
         os.makedirs(os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID))
@@ -72,6 +76,7 @@ def main(cfg, local_rank):
         shuffle=False,
         num_workers=1,
         pin_memory=True,
+        drop_last=cfg.TEST.DROP_LAST,
     )
 
     # Create training dataloader
@@ -152,12 +157,16 @@ def main(cfg, local_rank):
             )
             with torch.no_grad():
                 log_dict_val = trainer.val(epoch, val_loader)
+
             for k, v in log_dict_val.items():
-                try:
+                if k == "imgs":
+                    logger.write_image(k, v, epoch)
+                elif k == "figure":
+                    logger.add_figure(k, v.gcf(), epoch)
+                else:
                     logger.scalar_summary("val_{}".format(k), v, epoch)
                     logger.write("{} {:8f} | ".format(k, v))
-                except:
-                    logger.write_image(k, v, epoch)
+
             if log_dict_val["ACC@1"] > best:
                 best = log_dict_val["ACC@1"]
                 save_model(

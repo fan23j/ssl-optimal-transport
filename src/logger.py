@@ -78,3 +78,7 @@ class Logger(object):
         if USE_TENSORBOARD:
             v = v.unsqueeze(0)
             self.writer.add_images(k, v, global_step=epoch)
+
+    def add_figure(self, k, v, epoch):
+        if USE_TENSORBOARD:
+            self.writer.add_figure(k, v, global_step=epoch)

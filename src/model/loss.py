@@ -27,9 +27,14 @@ class Loss(nn.Module):
     def forward(self, *args):
         total_loss = 0
         loss_states = {}
+        loss_aux = None
         for loss in self.losses:
-            loss_dict = loss(*args)
+            loss_output = loss(*args)
+            if isinstance(loss_output, tuple):
+                loss_dict, loss_aux = loss_output
+            else:
+                loss_dict = loss_output
             total_loss += list(loss_dict.values())[0]
             loss_states.update(loss_dict)
         loss_states["loss"] = total_loss
-        return total_loss, loss_states
+        return total_loss, loss_states, loss_aux

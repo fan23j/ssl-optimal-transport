@@ -38,6 +38,19 @@ DATASET:
     TRAIN_SET: "train"
     TEST_SET: "valid"
     NUM_CLASSES: 10
+    LABELS:
+        [
+            "airplane",
+            "automobile",
+            "bird",
+            "cat",
+            "deer",
+            "dog",
+            "frog",
+            "horse",
+            "ship",
+            "truck",
+        ]
 
     # training data augmentation
     MEAN: [0.4914, 0.4822, 0.4465]
@@ -71,3 +84,4 @@ TEST:
     OUTPUT_FILE: "infonce_preds.csv"
     TASK: "simclr_linear"
     MODEL_PATH: "/home/main/ssl-optimal-transport/runs/finetune/simclr_cifar10_infonce/model_last.pth"
+    DROP_LAST: true

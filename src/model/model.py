@@ -51,13 +51,18 @@ def create_model(arch, cfg):
 
 def load_model(cfg, model, optimizer, lr_scheduler, strict=False):
     checkpoint = torch.load(cfg.MODEL.PRETRAINED)
-    # checkpoint_model = torch.load(cfg.MODEL.PRETRAINED, map_location="cpu")[
-    #     "state_dict"
-    # ]
-    # checkpoint_model = {
-    #     k: v for k, v in checkpoint_model.items() if k not in cfg.MODEL.UNWANTED_KEYS
-    # }
-    model.load_state_dict(checkpoint, strict=strict)
+    try:
+        checkpoint_model = torch.load(cfg.MODEL.PRETRAINED, map_location="cpu")[
+            "state_dict"
+        ]
+        checkpoint_model = {
+            k: v
+            for k, v in checkpoint_model.items()
+            if k not in cfg.MODEL.UNWANTED_KEYS
+        }
+        model.load_state_dict(checkpoint_model, strict=strict)
+    except:
+        model.load_state_dict(checkpoint, strict=strict)
     epoch = 0
     if cfg.TRAIN.RESUME:
         epoch = checkpoint["epoch"]

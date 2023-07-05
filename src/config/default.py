@@ -85,6 +85,7 @@ _C.DATASET.TRAIN_IMAGE_DIR = "images/train2017"
 _C.DATASET.TRAIN_ANNOTATIONS = ["person_keypoints_train2017.json"]
 _C.DATASET.VAL_IMAGE_DIR = "images/val2017"
 _C.DATASET.VAL_ANNOTATIONS = "person_keypoints_val2017.json"
+_C.DATASET.LABELS = []
 # training data augmentation
 _C.DATASET.USE_TEST_AUG = False
 _C.DATASET.MEAN = [0.408, 0.447, 0.470]
@@ -153,6 +154,7 @@ _C.TEST.OUTPUT_FILE = "predictions.csv"
 # Test Model Epoch
 _C.TEST.TASK = ""
 _C.TEST.MODEL_PATH = ""
+_C.TEST.DROP_LAST = False
 
 
 def update_config(cfg, args_cfg):

@@ -2,3 +2,4 @@ einops
 timm
 tensorboard
 gensim
+torch-summary
