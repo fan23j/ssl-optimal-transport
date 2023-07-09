@@ -46,7 +46,7 @@ class SwAV_Loss(nn.Module):
         Q *= B  # the colomns must sum to 1 so that Q is an assignment
         return Q.t()
 
-    def forward(self, output, queue, model, embedding):
+    def forward(self, output, queue, model, embedding, **kwargs):
         loss = 0
 
         for i, crop_id in enumerate(self.crops_for_assign):

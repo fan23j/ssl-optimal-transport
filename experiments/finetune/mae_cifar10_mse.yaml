@@ -4,7 +4,7 @@ TASK: "mae_linear"
 DEBUG: 0
 DEBUG_THEME: "white"
 SEED: 317
-OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/pretrain"
+OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/finetune"
 LOG_DIR: ""
 EXPERIMENT_NAME: ""
 GPUS: [0]
@@ -53,14 +53,17 @@ TRAIN:
     HIDE_DATA_TIME: false
     SAVE_ALL_MODEL: false
     RESUME: false
-    EPOCHS: 100
+    EPOCHS: 200
     NUM_ITERS: -1
     LR: 1e-3
-    WD: 0.05
-    BATCH_SIZE: 512
-    WARMUP_EPOCHS: 5
+    WD: 0.1
+    BATCH_SIZE: 128
+    WARMUP_EPOCHS: 20
 
     CHECKPOINT: ""
     SHUFFLE: true
     VAL_INTERVALS: 1
     TRAINVAL: false
+
+TEST:
+    BATCH_SIZE: 128

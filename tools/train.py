@@ -14,10 +14,8 @@ from config import cfg, update_config
 from datasets.dataset_factory import get_dataset
 from model.model import create_model, save_model, load_model
 from model.backbones.swav_resnet import resnet50
-from model.backbones.mae_vit import MAE_ViT
 from train.train_factory import train_factory
 from train.scheduler_factory import OptimizerSchedulerFactory
-from torchsummary import summary
 
 
 def parse_args():
@@ -45,7 +43,7 @@ def main(cfg, local_rank):
     #     output_dim=128,
     #     nmb_prototypes=100,
     # )
-    # model = MAE_ViT(mask_ratio=0.75).to("cuda")
+
     # create weights output directory
     if not os.path.exists(os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID)):
         os.makedirs(os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID))
@@ -134,10 +132,12 @@ def main(cfg, local_rank):
     trainer.set_device(device)
 
     print("Starting training...")
-    best = 0.0
+    best = {
+        "ACC@1": 0.0,
+        "ACC@5": 0.0,
+    }
 
     for epoch in range(start_epoch + 1, cfg.TRAIN.EPOCHS + 1):
-        mark = epoch if cfg.TRAIN.SAVE_ALL_MODEL else "last"
         train_sampler.set_epoch(epoch)
 
         # run training script
@@ -148,13 +148,6 @@ def main(cfg, local_rank):
             logger.write("{} {:8f} | ".format(k, v))
         # run validation script
         if cfg.TRAIN.VAL_INTERVALS > 0 and epoch % cfg.TRAIN.VAL_INTERVALS == 0:
-            save_model(
-                os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, "model_{}.pth".format(mark)),
-                epoch,
-                model,
-                optimizer,
-                lr_scheduler,
-            )
             with torch.no_grad():
                 log_dict_val = trainer.val(epoch, val_loader)
 
@@ -167,8 +160,9 @@ def main(cfg, local_rank):
                     logger.scalar_summary("val_{}".format(k), v, epoch)
                     logger.write("{} {:8f} | ".format(k, v))
 
-            if log_dict_val["ACC@1"] > best:
-                best = log_dict_val["ACC@1"]
+            if log_dict_val["ACC@1"] > best["ACC@1"]:
+                best["ACC@1"] = log_dict_val["ACC@1"]
+                best["ACC@5"] = log_dict_val["ACC@5"]
                 save_model(
                     os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, "model_best.pth"),
                     epoch,
@@ -176,29 +170,30 @@ def main(cfg, local_rank):
                     optimizer,
                     lr_scheduler,
                 )
-        else:
+
+        save_model(
+            os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, "model_last.pth"),
+            epoch,
+            model,
+            optimizer,
+            lr_scheduler,
+        )
+        if epoch % cfg.TRAIN.SAVE_INTERVAL == 0:
             save_model(
-                os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, "model_last.pth"),
+                os.path.join(
+                    cfg.OUTPUT_DIR, cfg.EXP_ID, "model_epoch_{}.pth".format(epoch)
+                ),
                 epoch,
                 model,
                 optimizer,
                 lr_scheduler,
             )
-            if epoch % 25 == 0:
-                save_model(
-                    os.path.join(
-                        cfg.OUTPUT_DIR, cfg.EXP_ID, "model_epoch_{}.pth".format(epoch)
-                    ),
-                    epoch,
-                    model,
-                    optimizer,
-                    lr_scheduler,
-                )
             log_dict_val = {}  # create an empty log_dict_val for non-validation epochs
         logger.write("\n")
 
     if cfg.TRAIN.VAL_INTERVALS > 0:
-        print("Best ACC@1: ", best)
+        print("Best ACC@1: ", best["ACC@1"])
+        print("Best ACC@5: ", best["ACC@5"])
     logger.close()
 
 

@@ -1,13 +1,12 @@
 import torch
-import torch.nn as nn
 from tqdm import tqdm
 
 from ..base_trainer import BaseTrainer
 
 
-class MAELinearTrainer(BaseTrainer):
+class LinearTrainer(BaseTrainer):
     def __init__(self, cfg, model, optimizer, lr_scheduler):
-        super(MAELinearTrainer, self).__init__(cfg, model, optimizer, lr_scheduler)
+        super(LinearTrainer, self).__init__(cfg, model, optimizer, lr_scheduler)
 
     def train(self, epoch, data_loader, is_train=True):
         self.model.train() if is_train else self.model.eval()
@@ -27,7 +26,7 @@ class MAELinearTrainer(BaseTrainer):
                     non_blocking=True
                 )
                 out = self.model(data)
-                loss, loss_states = self.loss(out, target)
+                loss, loss_states, _ = self.loss(out=out, target=target)
 
                 if is_train:
                     self.optimizer.zero_grad()
@@ -64,8 +63,8 @@ class MAELinearTrainer(BaseTrainer):
                         total_correct_5 / total_num * 100,
                     )
                 )
-        self.lr_scheduler.step()
 
+        self.lr_scheduler.step()
         # Average the accumulated loss_states
         for k in average_loss_states:
             average_loss_states[k] /= len(data_loader)

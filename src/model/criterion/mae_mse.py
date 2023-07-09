@@ -7,7 +7,7 @@ class Mae_MSE_Loss(nn.Module):
         super(Mae_MSE_Loss, self).__init__()
         self.mask_ratio = cfg.MODEL.MAE_MASK_RATIO
 
-    def forward(self, imgs, pred, mask):
+    def forward(self, imgs, pred, mask, **kwargs):
         """
         imgs: [N, 3, H, W]
         pred: [N, L, p*p*3]

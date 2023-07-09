@@ -9,7 +9,7 @@ class Classify_Anything_Loss(nn.Module):
         super(Classify_Anything_Loss, self).__init__()
         self.temperature = cfg.LOSS.TEMPERATURE
 
-    def forward(self, features, labels_vector, targets):
+    def forward(self, features, labels_vector, targets, **kwargs):
         """
         features: [B, 300]
         label_vector: [num_class, 300]

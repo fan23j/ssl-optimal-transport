@@ -24,12 +24,12 @@ class Loss(nn.Module):
         super(Loss, self).__init__()
         self.losses = [_loss_factory[name](cfg=cfg) for name in cfg.LOSS.METRIC]
 
-    def forward(self, *args):
+    def forward(self, **kwargs):
         total_loss = 0
         loss_states = {}
         loss_aux = None
         for loss in self.losses:
-            loss_output = loss(*args)
+            loss_output = loss(**kwargs)
             if isinstance(loss_output, tuple):
                 loss_dict, loss_aux = loss_output
             else:

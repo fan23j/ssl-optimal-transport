@@ -1,5 +1,5 @@
 DATA_DIR: "/home/main/ssl-optimal-transport/data"
-EXP_ID: "mae_cifar10_mse"
+EXP_ID: "mae_cifar10_gw_supervision"
 TASK: "mae_pretrain"
 DEBUG: 0
 DEBUG_THEME: "white"
@@ -18,8 +18,8 @@ CUDNN:
     BENCHMARK: true
 
 MODEL:
-    INIT_WEIGHTS: true
-    PRETRAINED: "/home/main/ssl-optimal-transport/runs/pretrain/mae_cifar10_mse/model_1502.pth"
+    INIT_WEIGHTS: false
+    PRETRAINED: ""
     NAME: "vit_tiny"
     HEADS: ["mae_decode"]
     INPUT_H: 32
@@ -31,9 +31,10 @@ MODEL:
     MAE_DECODER_DEPTH: 4
     MAE_DECODER_NUM_HEADS: 3
     MAE_MASK_RATIO: 0.75
+    SUPERVISION: "/home/main/ssl-optimal-transport/experiments/pretrain/gw_supervision/simclr_cifar10.yaml"
 
 LOSS:
-    METRIC: ["mae_mse"]
+    METRIC: ["mae_mse", "gromov_wasserstein"]
 
 DATASET:
     DATASET: "CIFAR10"
@@ -51,7 +52,7 @@ TRAIN:
     LOCAL_RANK: 0
     HIDE_DATA_TIME: false
     SAVE_ALL_MODEL: true
-    RESUME: true
+    RESUME: false
     EPOCHS: 2000
     NUM_ITERS: -1
     LR: 1.5e-4
@@ -61,7 +62,7 @@ TRAIN:
     SAVE_INTERVAL: 100
     CHECKPOINT: ""
     SHUFFLE: true
-    VAL_INTERVALS: 1
+    VAL_INTERVALS: 100
     TRAINVAL: false
 
 TEST:

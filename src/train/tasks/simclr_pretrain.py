@@ -1,5 +1,7 @@
 import torch
+import copy
 from tqdm import tqdm
+from model.model import create_model, load_model
 
 from ..base_trainer import BaseTrainer
 
@@ -7,6 +9,20 @@ from ..base_trainer import BaseTrainer
 class SimCLRPreTrainer(BaseTrainer):
     def __init__(self, cfg, model, optimizer, lr_scheduler):
         super(SimCLRPreTrainer, self).__init__(cfg, model, optimizer, lr_scheduler)
+        self.supervision = None
+        # ============ MAE supervision ============
+        if self.cfg.MODEL.SUPERVISION != "":
+            supervision_cfg = copy.deepcopy(cfg)
+
+            # Update supervision_cfg with new cfg file
+            supervision_cfg.merge_from_file(cfg.MODEL.SUPERVISION)
+
+            with torch.no_grad():
+                print("Loading supervision model...")
+                self.supervision = create_model(
+                    supervision_cfg.MODEL.NAME, supervision_cfg
+                )
+                self.supervision = load_model(supervision_cfg, self.supervision)[0]
 
     def train(self, epoch, data_loader):
         self.model.train()
@@ -24,7 +40,20 @@ class SimCLRPreTrainer(BaseTrainer):
             feature_1, out_1 = self.model(pos_1)
             feature_2, out_2 = self.model(pos_2)
 
-            loss, loss_states = self.loss(out_1, out_2)
+            if self.supervision:
+                # if supervised model cfg is provided, use task supervision
+                pos_3 = batch["out_3"]
+                _, _, mae_features = self.supervision(pos_3)
+                mae_features = mae_features.cuda(non_blocking=True)
+
+                loss, loss_states, _ = self.loss(
+                    out_1=out_1,
+                    out_2=out_2,
+                    features_1=mae_features,
+                    features_2=out_1,
+                )
+            else:
+                loss, loss_states, _ = self.loss(out_1=out_1, out_2=out_2)
 
             self.optimizer.zero_grad()
             loss.backward()

@@ -1,0 +1,66 @@
+DATA_DIR: "/home/main/ssl-optimal-transport/data"
+EXP_ID: "simclr_cifar100_gw_supervision"
+TASK: "simclr_pretrain"
+DEBUG: 0
+DEBUG_THEME: "white"
+SEED: 317
+OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/pretrain"
+LOG_DIR: ""
+EXPERIMENT_NAME: ""
+GPUS: [0]
+WORKERS: 0
+PRINT_FREQ: 0
+PIN_MEMORY: true
+RANK: 0
+SAVE_RESULTS: true
+
+CUDNN:
+    BENCHMARK: true
+
+MODEL:
+    INIT_WEIGHTS: false
+    PRETRAINED: ""
+    HEADS: ["projection"]
+    NAME: "resnet50"
+    INPUT_H: 32
+    INPUT_W: 32
+    SUPERVISION: "/home/main/ssl-optimal-transport/experiments/pretrain/gw_supervision/mae_cifar100.yaml"
+
+LOSS:
+    METRIC: ["infonce", "gromov_wasserstein"]
+    TEMPERATURE: 0.5
+    GW_MAX_ITER: 5
+    GW_EPSILON: 0.05
+
+DATASET:
+    DATASET: "CIFAR100"
+    TRAIN_SET: "train"
+    TEST_SET: "valid"
+
+    # training data augmentation
+    MEAN: [0.4914, 0.4822, 0.4465]
+    STD: [0.2023, 0.1994, 0.2010]
+    RANDOM_RESIZED_CROP: 32
+    RANDOM_HORIZONTAL_FLIP: 0.5
+    # color jitter
+    COLOR_JITTER: [0.4, 0.4, 0.4, 0.1, 0.8]
+    RANDOM_GRAYSCALE: 0.2
+    IMAGE_SIZE: 32
+
+TRAIN:
+    OPTIMIZER: "adam"
+    DISTRIBUTE: false
+    LOCAL_RANK: 0
+    HIDE_DATA_TIME: false
+    SAVE_ALL_MODEL: false
+    RESUME: false
+    EPOCHS: 500
+    NUM_ITERS: -1
+    LR: 1e-3
+    WD: 1e-6
+    BATCH_SIZE: 256
+
+    CHECKPOINT: ""
+    SHUFFLE: true
+    VAL_INTERVALS: 0
+    TRAINVAL: false

@@ -88,4 +88,5 @@ class MAEDecoderHead(nn.Module):
         img = self.patch2img(patches)  # 得到 重构之后的 img
         mask = self.patch2img(mask)
 
-        return img, mask
+        # x[0][0] - cls token from vit-tiny features
+        return img, mask, x[0][0]

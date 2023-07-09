@@ -56,7 +56,7 @@ class SwAVPreTrainer(BaseTrainer):
             embedding = embedding.detach()
 
             # ============ swav loss ... ============
-            loss, loss_states = self.loss(output, self.queue, self.model, embedding)
+            loss, loss_states, _ = self.loss(output, self.queue, self.model, embedding)
 
             # ============ backward and optim step ... ============
             self.optimizer.zero_grad()

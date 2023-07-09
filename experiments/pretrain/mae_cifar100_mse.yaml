@@ -18,8 +18,8 @@ CUDNN:
     BENCHMARK: true
 
 MODEL:
-    INIT_WEIGHTS: false
-    PRETRAINED: ""
+    INIT_WEIGHTS: true
+    PRETRAINED: "/home/main/ssl-optimal-transport/runs/pretrain/mae_cifar100_mse/model_1509.pth"
     NAME: "vit_tiny"
     HEADS: ["mae_decode"]
     INPUT_H: 32
@@ -27,39 +27,44 @@ MODEL:
     MAE_EMBED_DIM: 192
     MAE_PATCH_SIZE: 2
     MAE_ENCODER_DEPTH: 12
-    MAE_ENCODER_NUM_HEADS: 6
+    MAE_ENCODER_NUM_HEADS: 3
     MAE_DECODER_DEPTH: 4
     MAE_DECODER_NUM_HEADS: 3
     MAE_MASK_RATIO: 0.75
 
 LOSS:
     METRIC: ["mae_mse"]
-    NORM_PIX_LOSS: False
-    NORM_PIX_LOSS_EPSILON: 1e-6
 
 DATASET:
-    DATASET: "CIFAR10"
+    DATASET: "CIFAR100"
+    SAMPLE: "SIMCLR"
     TRAIN_SET: "train"
     TEST_SET: "valid"
     IMAGE_SIZE: 32
-    USE_TEST_AUG: True
-    NUM_CLASSES: 100
+    NUM_CLASSES: 10
+    MEAN: [0.5]
+    STD: [0.5]
 
 TRAIN:
     OPTIMIZER: "adamw"
     DISTRIBUTE: false
     LOCAL_RANK: 0
     HIDE_DATA_TIME: false
-    SAVE_ALL_MODEL: false
-    RESUME: false
+    SAVE_ALL_MODEL: true
+    RESUME: true
     EPOCHS: 2000
     NUM_ITERS: -1
     LR: 1.5e-4
     WD: 0.05
     BATCH_SIZE: 512
     WARMUP_EPOCHS: 200
-
+    SAVE_INTERVAL: 100
     CHECKPOINT: ""
     SHUFFLE: true
-    VAL_INTERVALS: 0
+    VAL_INTERVALS: 1
     TRAINVAL: false
+
+TEST:
+    BATCH_SIZE: 16
+    TASK: "mae_pretrain"
+    MODEL_PATH: "/home/main/ssl-optimal-transport/runs/pretrain/mae_cifar100_mse/model_last.pth"

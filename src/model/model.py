@@ -49,7 +49,7 @@ def create_model(arch, cfg):
     return BackBone(arch, cfg)
 
 
-def load_model(cfg, model, optimizer, lr_scheduler, strict=False):
+def load_model(cfg, model, optimizer=None, lr_scheduler=None, strict=False):
     checkpoint = torch.load(cfg.MODEL.PRETRAINED)
     try:
         checkpoint_model = torch.load(cfg.MODEL.PRETRAINED, map_location="cpu")[

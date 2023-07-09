@@ -12,7 +12,7 @@ class Sinkhorn_Loss(nn.Module):
         self.sinkhorn_iters = cfg.LOSS.SINKHORN_MAX_ITER
         self.gamma = cfg.LOSS.SINKHORN_GAMMA
 
-    def cosine_similarity(self, out_1, out_2):
+    def cosine_similarity(self, out_1, out_2, **kwargs):
         """
         Construct the cosine similarity matrix.
 

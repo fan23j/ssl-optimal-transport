@@ -4,6 +4,7 @@ import torch.nn.functional as F
 
 from .gw import entropic_gromov_wasserstein
 
+
 class Gromov_Wasserstein_Loss(nn.Module):
     def __init__(self, cfg):
         super(Gromov_Wasserstein_Loss, self).__init__()
@@ -14,10 +15,10 @@ class Gromov_Wasserstein_Loss(nn.Module):
         self.gw_epsilon = cfg.LOSS.GW_EPSILON
         self.sinkhorn_max_iter = cfg.LOSS.SINKHORN_MAX_ITER
         self.gamma = cfg.LOSS.GW_GAMMA
-    
-    def forward(self, out_1, out_2):
-        out_1 = F.normalize(out_1, dim=1)
-        out_2 = F.normalize(out_2, dim=1)
+
+    def forward(self, features_1, features_2, **kwargs):
+        out_1 = F.normalize(features_1, dim=1)
+        out_2 = F.normalize(features_2, dim=1)
 
         # compute distance matrix
         daa = 1.0 - torch.matmul(out_1, out_1.t())
@@ -30,10 +31,20 @@ class Gromov_Wasserstein_Loss(nn.Module):
         n = daa.shape[0]
 
         # init p and q
-        p = torch.full((n,), 1./n, device=daa.device)
-        q = torch.full((n,), 1./n, device=dbb.device)
+        p = torch.full((n,), 1.0 / n, device=daa.device)
+        q = torch.full((n,), 1.0 / n, device=dbb.device)
 
-        gw = entropic_gromov_wasserstein(daa, dbb, p, q, 'square_loss', epsilon=self.gw_epsilon, max_iter=self.gw_max_iter, sinkhorn_max_iter=self.sinkhorn_max_iter, verbose=True)
+        gw = entropic_gromov_wasserstein(
+            daa,
+            dbb,
+            p,
+            q,
+            "square_loss",
+            epsilon=self.gw_epsilon,
+            max_iter=self.gw_max_iter,
+            sinkhorn_max_iter=self.sinkhorn_max_iter,
+            verbose=True,
+        )
 
         # small epsilon to avoid nan
         epsilon = 1e-10
@@ -41,4 +52,4 @@ class Gromov_Wasserstein_Loss(nn.Module):
         # compute loss
         loss = -torch.log(torch.diag(gw) + epsilon).sum()
 
-        return {'gw_loss': loss * self.gamma}
+        return {"gw_loss": loss * self.gamma}

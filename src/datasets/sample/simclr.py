@@ -12,7 +12,9 @@ class SimCLRSampler(Sampler):
             out_1 = dataset.transform(img)
             out_2 = dataset.transform(img)
 
+        out_3 = dataset.test_transform(img)
+
         if dataset.target_transform is not None:
             target = dataset.target_transform(target)
 
-        return {"out_1": out_1, "out_2": out_2, "target": target}
+        return {"out_1": out_1, "out_2": out_2, "target": target, "out_3": out_3}
