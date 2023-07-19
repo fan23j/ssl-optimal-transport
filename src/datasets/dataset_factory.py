@@ -4,6 +4,7 @@ from .dataset.LT_cifar10 import LongTailCIFAR10
 from .dataset.LT_cifar100 import LongTailCIFAR100
 from .dataset.multi_crop_dataset import MultiCropDataset
 from .dataset.LT_imagenet.LT_imagenet import LT_Imagenet
+from .dataset.coco import Coco
 
 from .sample.mae import MaeSampler
 from .sample.simclr import SimCLRSampler
@@ -17,6 +18,7 @@ _dataset_factory = {
     "LT_CIFAR100": LongTailCIFAR100,
     "MULTICROP": MultiCropDataset,
     "LT_IMAGENET": LT_Imagenet,
+    "COCO": Coco,
 }
 
 _sample_factory = {

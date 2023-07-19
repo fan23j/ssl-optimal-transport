@@ -14,9 +14,13 @@ from .heads.none_head import NoneHead
 from .heads.vit_classifier_head import ViTClassifierHead
 from .heads.reshape_head import ReshapeHead
 
+def get_resnet50_imagenet(cfg):
+    return torch.hub.load('facebookresearch/swav:main', 'resnet50')
+
 _backbone_factory = {
     "resnet50": get_resnet50,
     "vit_tiny": get_vit_tiny,
+    "resnet50_imagenet": get_resnet50_imagenet,
 }
 
 _head_factory = {

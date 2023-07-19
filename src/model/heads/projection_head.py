@@ -9,7 +9,7 @@ class ProjectionHead(nn.Module):
         super(ProjectionHead, self).__init__()
 
         self.head = nn.Sequential(
-            nn.Linear(2048, cfg.MODEL.HIDDEN_MLP, bias=False),
+            nn.Linear(1000, cfg.MODEL.HIDDEN_MLP, bias=False),
             nn.BatchNorm1d(cfg.MODEL.HIDDEN_MLP),
             nn.ReLU(inplace=True),
             nn.Linear(cfg.MODEL.HIDDEN_MLP, cfg.MODEL.FEATURE_DIM, bias=True),

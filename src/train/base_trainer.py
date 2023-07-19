@@ -7,7 +7,7 @@ from model.loss import Loss
 
 
 class BaseTrainer(object):
-    def __init__(self, cfg, model, optimizer=None, lr_scheduler=None):
+    def __init__(self, cfg, model, optimizer=None, lr_scheduler=None, dataset=None):
         self.cfg = cfg
         self.optimizer = optimizer
         self.lr_scheduler = lr_scheduler
@@ -15,6 +15,7 @@ class BaseTrainer(object):
         self.model = model
         self.temperature = cfg.LOSS.TEMPERATURE
         self.local_rank = len(cfg.GPUS) - 1
+        self.dataset = dataset
 
     def set_device(self, device):
         if self.cfg.TRAIN.DISTRIBUTE:

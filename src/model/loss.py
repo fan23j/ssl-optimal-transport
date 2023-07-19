@@ -7,6 +7,7 @@ from .criterion.cross_entropy import Cross_Entropy_Loss
 from .criterion.mae_mse import Mae_MSE_Loss
 from .criterion.swav import SwAV_Loss
 from .criterion.classify_anything import Classify_Anything_Loss
+from .criterion.classify_anything_multilabel import Classify_Anything_MultiLabel_Loss
 
 _loss_factory = {
     "infonce": Info_NCE_Loss,
@@ -16,6 +17,7 @@ _loss_factory = {
     "mae_mse": Mae_MSE_Loss,
     "swav": SwAV_Loss,
     "classify_anything": Classify_Anything_Loss,
+    "classify_anything_multi": Classify_Anything_MultiLabel_Loss,
 }
 
 
