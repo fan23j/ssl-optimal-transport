@@ -151,6 +151,8 @@ def main(cfg, local_rank):
             with torch.no_grad():
                 log_dict_val = trainer.val(epoch, val_loader)
 
+            primary_metric = list(log_dict_val.keys())[0]
+
             for k, v in log_dict_val.items():
                 if k == "imgs":
                     logger.write_image(k, v, epoch)
@@ -160,9 +162,9 @@ def main(cfg, local_rank):
                     logger.scalar_summary("val_{}".format(k), v, epoch)
                     logger.write("{} {:8f} | ".format(k, v))
 
-            if log_dict_val["ACC@1"] > best["ACC@1"]:
-                best["ACC@1"] = log_dict_val["ACC@1"]
-                best["ACC@5"] = log_dict_val["ACC@5"]
+            # Check and store best values based on primary metric
+            if log_dict_val[primary_metric] > best[primary_metric]:
+                best[primary_metric] = log_dict_val[primary_metric]
                 save_model(
                     os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, "model_best.pth"),
                     epoch,
@@ -192,8 +194,7 @@ def main(cfg, local_rank):
         logger.write("\n")
 
     if cfg.TRAIN.VAL_INTERVALS > 0:
-        print("Best ACC@1: ", best["ACC@1"])
-        print("Best ACC@5: ", best["ACC@5"])
+        print("Best {}: ".format(primary_metric), best[primary_metric])
     logger.close()
 
 

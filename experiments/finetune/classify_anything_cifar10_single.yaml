@@ -24,7 +24,8 @@ MODEL:
     HEADS: ["projection", "reshape"]
     INPUT_H: 32
     INPUT_W: 32
-    WORD2VEC: "/home/main/ssl-optimal-transport/weights/GoogleNews-vectors-negative300.bin.gz"
+    LABEL_VECTORS: "weights/cifar10_label_vectors.pt"
+    NEGATIVE_VECTORS: "weights/cifar10_negative_vectors.pt"
     OUTPUT_FEATURES: 300
 
 LOSS:

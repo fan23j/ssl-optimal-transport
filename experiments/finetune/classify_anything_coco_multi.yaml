@@ -24,8 +24,9 @@ MODEL:
     HEADS: ["projection", "reshape"]
     INPUT_H: 32
     INPUT_W: 32
-    #WORD2VEC: "/home/main/ssl-optimal-transport/weights/GoogleNews-vectors-negative300.bin.gz"
-    WORD2VEC: "/home/main/ssl-optimal-transport/weights/crawl-300d-2M.vec"
+    HEAD_INPUT_DIM: 1000
+    LABEL_VECTORS: "/home/main/ssl-optimal-transport/weights/coco_label_vectors.pt"
+    NEGATIVE_VECTORS: "/home/main/ssl-optimal-transport/weights/coco_negative_vectors.pt"
     OUTPUT_FEATURES: 300
 
 LOSS:
@@ -127,7 +128,7 @@ DATASET:
 ]
 
 TRAIN:
-    OPTIMIZER: "adam"
+    OPTIMIZER: "adamw"
     DISTRIBUTE: false
     LOCAL_RANK: 0
     HIDE_DATA_TIME: false
@@ -136,8 +137,9 @@ TRAIN:
     EPOCHS: 100
     NUM_ITERS: -1
     LR: 1e-3
-    WD: 1e-6
+    WD: 0.1
     BATCH_SIZE: 128
+    WARMUP_EPOCHS: 20
 
     CHECKPOINT: ""
     SHUFFLE: true
