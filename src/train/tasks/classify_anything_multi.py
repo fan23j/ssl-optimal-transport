@@ -14,9 +14,9 @@ from ..base_trainer import BaseTrainer
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-class SimCLRClassifyAnythingTrainer(BaseTrainer):
+class ClassifyAnythingMultiTrainer(BaseTrainer):
     def __init__(self, cfg, model, optimizer, lr_scheduler):
-        super(SimCLRClassifyAnythingTrainer, self).__init__(
+        super(ClassifyAnythingMultiTrainer, self).__init__(
             cfg, model, optimizer, lr_scheduler
         )
         print("Loading pre-computed word vectors...")
@@ -33,12 +33,11 @@ class SimCLRClassifyAnythingTrainer(BaseTrainer):
 
     def train(self, epoch, data_loader, is_train=True):
         self.model.train() if is_train else self.model.eval()
-        mAP_all, total_num, data_bar = (
-            0.0,
-            0,
-            tqdm(data_loader),
-        )
+        data_bar = tqdm(data_loader)
         average_loss_states = {}
+        # collect all targets and predictions
+        all_targets = []
+        all_preds = []
 
         with torch.enable_grad() if is_train else torch.no_grad():
             for it, batch in enumerate(data_bar):
@@ -62,7 +61,6 @@ class SimCLRClassifyAnythingTrainer(BaseTrainer):
                     loss.backward()
                     self.optimizer.step()
 
-                total_num += data.size(0)
                 # Accumulate average_loss_states
                 for k, v in loss_states.items():
                     if k not in average_loss_states:
@@ -77,10 +75,17 @@ class SimCLRClassifyAnythingTrainer(BaseTrainer):
                 # apply sigmoid to cosim_softmax to get predictions between 0 and 1
                 preds = torch.sigmoid(cosim_softmax)
 
+                all_preds.append(preds.cpu())
+                all_targets.append(target.cpu())
+
+                # calculate mAP for current collected predictions and targets
+                cur_preds = torch.cat(all_preds, dim=0)
+                cur_targets = torch.cat(all_targets, dim=0)
+
                 average_precisions = []
-                for class_idx in range(target.shape[1]):
-                    class_preds = preds[:, class_idx].cpu().detach().numpy()
-                    class_targets = target[:, class_idx].cpu().detach().numpy()
+                for class_idx in range(cur_targets.shape[1]):
+                    class_preds = cur_preds[:, class_idx].detach().numpy()
+                    class_targets = cur_targets[:, class_idx].detach().numpy()
                     try:
                         average_precision = average_precision_score(
                             class_targets, class_preds
@@ -89,7 +94,7 @@ class SimCLRClassifyAnythingTrainer(BaseTrainer):
                     except UndefinedMetricWarning:
                         pass  # Ignore this specific warning
                 mAP = np.mean(average_precisions)
-                mAP_all += mAP
+
                 data_bar.set_description(
                     "{} Epoch: [{}/{}] {} mAP: {:.2f}%".format(
                         "Train" if is_train else "Test",
@@ -104,7 +109,8 @@ class SimCLRClassifyAnythingTrainer(BaseTrainer):
         for k in average_loss_states:
             average_loss_states[k] /= len(data_loader)
 
-        average_loss_states["mAP"] = mAP_all / total_num * 100
+        average_loss_states["mAP"] = mAP * 100
+        average_loss_states["metric"] = average_loss_states["mAP"]
         return average_loss_states
 
     def val(self, epoch, test_data_loader):

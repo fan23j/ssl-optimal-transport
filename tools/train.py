@@ -133,8 +133,7 @@ def main(cfg, local_rank):
 
     print("Starting training...")
     best = {
-        "ACC@1": 0.0,
-        "ACC@5": 0.0,
+        "metric": 0.0,
     }
 
     for epoch in range(start_epoch + 1, cfg.TRAIN.EPOCHS + 1):
@@ -151,8 +150,6 @@ def main(cfg, local_rank):
             with torch.no_grad():
                 log_dict_val = trainer.val(epoch, val_loader)
 
-            primary_metric = list(log_dict_val.keys())[0]
-
             for k, v in log_dict_val.items():
                 if k == "imgs":
                     logger.write_image(k, v, epoch)
@@ -163,8 +160,8 @@ def main(cfg, local_rank):
                     logger.write("{} {:8f} | ".format(k, v))
 
             # Check and store best values based on primary metric
-            if log_dict_val[primary_metric] > best[primary_metric]:
-                best[primary_metric] = log_dict_val[primary_metric]
+            if log_dict_val["metric"] > best["metric"]:
+                best["metric"] = log_dict_val["metric"]
                 save_model(
                     os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, "model_best.pth"),
                     epoch,
@@ -194,7 +191,7 @@ def main(cfg, local_rank):
         logger.write("\n")
 
     if cfg.TRAIN.VAL_INTERVALS > 0:
-        print("Best {}: ".format(primary_metric), best[primary_metric])
+        print("Best {}: ".format("metric"), best["metric"])
     logger.close()
 
 
