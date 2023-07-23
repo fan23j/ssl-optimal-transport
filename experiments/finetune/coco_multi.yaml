@@ -1,0 +1,65 @@
+DATA_DIR: "/home/main/data/coco"
+EXP_ID: "coco_multi"
+TASK: "multiclass_linear"
+DEBUG: 0
+DEBUG_THEME: "white"
+SEED: 317
+OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/finetune"
+LOG_DIR: ""
+EXPERIMENT_NAME: ""
+GPUS: [0]
+WORKERS: 0
+PRINT_FREQ: 0
+PIN_MEMORY: true
+RANK: 0
+SAVE_RESULTS: true
+
+CUDNN:
+    BENCHMARK: true
+
+MODEL:
+    INIT_WEIGHTS: false
+    PRETRAINED: ""
+    NAME: "resnet50_imagenet"
+    HEADS: ["multi_classifier"]
+    INPUT_H: 224
+    INPUT_W: 224
+    HEAD_INPUT_DIM: 1000
+
+LOSS:
+    METRIC: ["bce_with_logits"]
+
+DATASET:
+    DATASET: "COCO"
+    SAMPLE: "NONE"
+    TRAIN_SET: "train"
+    TEST_SET: "valid"
+    NUM_CLASSES: 80
+    IMAGE_SIZE: 224
+    TRAIN_IMAGE_DIR: "images/train"
+    VAL_IMAGE_DIR: "images/val"
+    TRAIN_ANNOTATIONS: "annotations/annotations/instances_train2017.json"
+    VAL_ANNOTATIONS: "annotations/annotations/instances_val2017.json"
+
+TRAIN:
+    OPTIMIZER: "adamw"
+    DISTRIBUTE: false
+    LOCAL_RANK: 0
+    HIDE_DATA_TIME: false
+    SAVE_ALL_MODEL: false
+    RESUME: false
+    EPOCHS: 100
+    NUM_ITERS: -1
+    LR: 1e-3
+    WD: 0.1
+    BATCH_SIZE: 128
+    WARMUP_EPOCHS: 20
+
+    CHECKPOINT: ""
+    SHUFFLE: true
+    VAL_INTERVALS: 1
+    TRAINVAL: false
+
+TEST:
+    BATCH_SIZE: 128
+    DROP_LAST: true

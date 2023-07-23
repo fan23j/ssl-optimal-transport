@@ -6,6 +6,7 @@ from .tasks.mae_pretrain import MAEPreTrainer
 from .tasks.classify_anything_multi import ClassifyAnythingMultiTrainer
 from .tasks.classify_anything_single import ClassifyAnythingSingleTrainer
 from .tasks.swav_pretrain import SwAVPreTrainer
+from .tasks.multiclass_linear import MultiClassLinearTrainer
 
 train_factory = {
     "simclr_pretrain": SimCLRPreTrainer,
@@ -15,4 +16,5 @@ train_factory = {
     "classify_anything_multi": ClassifyAnythingMultiTrainer,
     "classify_anything_single": ClassifyAnythingSingleTrainer,
     "swav_pretrain": SwAVPreTrainer,
+    "multiclass_linear": MultiClassLinearTrainer,
 }

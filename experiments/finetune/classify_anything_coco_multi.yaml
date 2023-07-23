@@ -22,8 +22,8 @@ MODEL:
     PRETRAINED: ""
     NAME: "resnet50_imagenet"
     HEADS: ["projection", "reshape"]
-    INPUT_H: 32
-    INPUT_W: 32
+    INPUT_H: 224
+    INPUT_W: 224
     HEAD_INPUT_DIM: 1000
     LABEL_VECTORS: "/home/main/ssl-optimal-transport/weights/coco_label_vectors.pt"
     NEGATIVE_VECTORS: "/home/main/ssl-optimal-transport/weights/coco_negative_vectors.pt"
