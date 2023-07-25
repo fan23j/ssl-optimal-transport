@@ -18,8 +18,8 @@ CUDNN:
     BENCHMARK: true
 
 MODEL:
-    INIT_WEIGHTS: false
-    PRETRAINED: ""
+    INIT_WEIGHTS: true
+    PRETRAINED: "/home/main/ssl-optimal-transport/runs/finetune/classify_anything_coco_multi/model_last.pth"
     NAME: "resnet50_imagenet"
     HEADS: ["projection", "reshape"]
     INPUT_H: 224
@@ -133,7 +133,7 @@ TRAIN:
     LOCAL_RANK: 0
     HIDE_DATA_TIME: false
     SAVE_ALL_MODEL: false
-    RESUME: false
+    RESUME: true
     EPOCHS: 100
     NUM_ITERS: -1
     LR: 1e-3

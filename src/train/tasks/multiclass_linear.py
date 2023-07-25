@@ -36,7 +36,7 @@ class MultiClassLinearTrainer(BaseTrainer):
                 )
                 preds = self.model(data)
 
-                loss, loss_states = self.loss(
+                loss, loss_states, _ = self.loss(
                     preds=preds,
                     targets=target,
                 )
@@ -66,7 +66,9 @@ class MultiClassLinearTrainer(BaseTrainer):
 
                 average_precisions = []
                 for class_idx in range(cur_targets.shape[1]):
-                    class_preds = cur_preds[:, class_idx].detach().numpy()
+                    class_preds = (
+                        torch.sigmoid(cur_preds[:, class_idx]).detach().numpy()
+                    )
                     class_targets = cur_targets[:, class_idx].detach().numpy()
                     try:
                         average_precision = average_precision_score(

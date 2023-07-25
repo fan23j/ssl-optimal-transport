@@ -13,7 +13,6 @@ from .heads.mae_decoder_head import MAEDecoderHead
 from .heads.none_head import NoneHead
 from .heads.vit_classifier_head import ViTClassifierHead
 from .heads.reshape_head import ReshapeHead
-from .heads.multi_classifier_head import MultiClassifierHead
 
 
 def get_resnet50_imagenet(cfg):
@@ -32,7 +31,6 @@ _head_factory = {
     "mae_decode": MAEDecoderHead,
     "vit_classifier": ViTClassifierHead,
     "reshape": ReshapeHead,
-    "multi_classifier": MultiClassifierHead,
     "none": NoneHead,
 }
 

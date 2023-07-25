@@ -21,13 +21,13 @@ MODEL:
     INIT_WEIGHTS: false
     PRETRAINED: ""
     NAME: "resnet50_imagenet"
-    HEADS: ["multi_classifier"]
+    HEADS: ["linear"]
     INPUT_H: 224
     INPUT_W: 224
     HEAD_INPUT_DIM: 1000
 
 LOSS:
-    METRIC: ["bce_with_logits"]
+    METRIC: ["bce"]
 
 DATASET:
     DATASET: "COCO"

@@ -7,7 +7,9 @@ class LinearClassifierHead(nn.Module):
     def __init__(self, cfg):
         super(LinearClassifierHead, self).__init__()
 
-        self.head = nn.Linear(2048, cfg.DATASET.NUM_CLASSES, bias=True)
+        self.head = nn.Linear(
+            cfg.MODEL.HEAD_INPUT_DIM, cfg.DATASET.NUM_CLASSES, bias=True
+        )
 
         self.init_weights()
 
