@@ -12,4 +12,4 @@ class BCE_Loss(nn.Module):
         preds = torch.sigmoid(preds)
         loss = self.loss_fn(preds, targets.float())
 
-        return {"bce_with_logits_loss": loss}
+        return {"bce_loss": loss}
