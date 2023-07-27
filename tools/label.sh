@@ -1,1 +1,1 @@
-python3 generate_label_vectors.py COCO --word2vec ../weights/crawl-300d-2M.vec --label_vectors_file ../weights/coco_label_vectors.pt --negative_vectors_file ../weights/coco_negative_vectors.pt --binary false
+python3 generate_label_vectors.py COCO --word2vec ../weights/crawl-300d-2M.vec --label_vectors_file ../weights/mixed_label_vectors.pt --negative_vectors_file ../weights/mixed_negative_vectors.pt --binary false --dict true

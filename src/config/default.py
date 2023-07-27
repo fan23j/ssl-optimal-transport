@@ -90,6 +90,7 @@ _C.DATASET.TRAIN_ANNOTATIONS = "person_keypoints_train2017.json"
 _C.DATASET.VAL_IMAGE_DIR = "images/val2017"
 _C.DATASET.VAL_ANNOTATIONS = "person_keypoints_val2017.json"
 _C.DATASET.LABELS = []
+_C.DATASET.PAD_CIFAR = False
 # training data augmentation
 _C.DATASET.USE_TEST_AUG = False
 _C.DATASET.MEAN = [0.408, 0.447, 0.470]

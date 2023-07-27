@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 from gensim.models import KeyedVectors
 import torch
+import re
 
 COCO_LABELS = [
     "person",
@@ -219,7 +220,7 @@ def get_word_vector(word, word2vec):
     if word in word2vec.key_to_index:
         return word2vec[word]
     else:
-        words = word.split(" ")
+        words = re.split(r"[ _]", word)
         word_vecs = [word2vec[w] for w in words if w in word2vec.key_to_index]
         if not word_vecs:
             raise ValueError(f"None of the words in {word} are in the vocabulary.")
@@ -250,15 +251,47 @@ def get_label_and_negative_vectors(vector_dimension, labels_list, word2vec):
     return label_vectors, negative_vectors
 
 
+def get_label_and_negative_vectors_dict(vector_dimension, labels_list, word2vec):
+    label_vectors = {}
+    negative_vectors = {}
+
+    for label in labels_list:
+        try:
+            label_vectors[label] = get_word_vector(label, word2vec)
+        except ValueError as e:
+            print(e)
+
+    all_labels = set(word2vec.key_to_index.keys())
+    for label in labels_list:
+        negative_labels = all_labels - set([label])
+        negative_vectors[label] = np.zeros((vector_dimension,))
+        for negative_label in negative_labels:
+            try:
+                negative_vectors[label] += get_word_vector(negative_label, word2vec)
+            except ValueError as e:
+                print(e)
+        negative_vectors[label] /= len(negative_labels)
+
+    return label_vectors, negative_vectors
+
+
 def main(args):
     print("Loading Word2Vec model...")
     word2vec = KeyedVectors.load_word2vec_format(args.word2vec, binary=False)
 
     labels_list = _labels_factory[args.dataset]
+    labels_list = _labels_factory["COCO"].copy()
+    labels_list.extend(_labels_factory["CIFAR100"])
+    labels_list = set(labels_list)
     vector_dimension = _vector_dim_factory[args.dataset]
-    label_vectors, negative_vectors = get_label_and_negative_vectors(
-        vector_dimension, labels_list, word2vec
-    )
+    if args.dict:
+        label_vectors, negative_vectors = get_label_and_negative_vectors_dict(
+            vector_dimension, labels_list, word2vec
+        )
+    else:
+        label_vectors, negative_vectors = get_label_and_negative_vectors(
+            vector_dimension, labels_list, word2vec
+        )
     print("Generating label vectors...")
     torch.save(label_vectors, args.label_vectors_file)
     print("Generating negative vectors...")
@@ -291,6 +324,11 @@ if __name__ == "__main__":
         "--binary",
         help="Load Word2Vec model in binary format.",
         default=True,
+    )
+    parser.add_argument(
+        "--dict",
+        help="Load label vectors and negative vectors as dictionaries.",
+        default=False,
     )
     args = parser.parse_args()
 

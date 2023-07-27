@@ -9,28 +9,118 @@ from pycocotools.coco import COCO
 from PIL import Image, ImageDraw
 from randaugment import RandAugment
 
+
 class Coco(datasets.coco.CocoDetection):
     def __init__(self, cfg, root, train=True, download=False, sampler=None):
         self.root = root
-        self.annotation_file = cfg.DATASET.TRAIN_ANNOTATIONS if train else cfg.DATASET.VAL_ANNOTATIONS
-        self.coco = COCO(os.path.join(root,self.annotation_file))
-        self.img_dir = os.path.join(root, cfg.DATASET.TRAIN_IMAGE_DIR if train else cfg.DATASET.VAL_IMAGE_DIR)
+        self.annotation_file = (
+            cfg.DATASET.TRAIN_ANNOTATIONS if train else cfg.DATASET.VAL_ANNOTATIONS
+        )
+        self.coco = COCO(os.path.join(root, self.annotation_file))
+        self.img_dir = os.path.join(
+            root, cfg.DATASET.TRAIN_IMAGE_DIR if train else cfg.DATASET.VAL_IMAGE_DIR
+        )
         self.ids = list(self.coco.imgToAnns.keys())
-        self.train_transform = transforms.Compose([
-            transforms.Resize((cfg.DATASET.IMAGE_SIZE, cfg.DATASET.IMAGE_SIZE)),
-                                      CutoutPIL(cutout_factor=0.5),
-                                      RandAugment(),
-                                      transforms.ToTensor(),
-                                  ])
-        self.test_transform = transforms.Compose([
-                                    transforms.Resize((cfg.DATASET.IMAGE_SIZE, cfg.DATASET.IMAGE_SIZE)),
-                                    transforms.ToTensor(),
-                                ])
+        self.train_transform = transforms.Compose(
+            [
+                transforms.Resize((cfg.DATASET.IMAGE_SIZE, cfg.DATASET.IMAGE_SIZE)),
+                CutoutPIL(cutout_factor=0.5),
+                RandAugment(),
+                transforms.ToTensor(),
+            ]
+        )
+        self.test_transform = transforms.Compose(
+            [
+                transforms.Resize((cfg.DATASET.IMAGE_SIZE, cfg.DATASET.IMAGE_SIZE)),
+                transforms.ToTensor(),
+            ]
+        )
         self.transform = self.train_transform if train else self.test_transform
         self.cat2cat = dict()
         for cat in self.coco.cats.keys():
             self.cat2cat[cat] = len(self.cat2cat)
-
+        self.class_labels = [
+            "person",
+            "bicycle",
+            "car",
+            "motorcycle",
+            "airplane",
+            "bus",
+            "train",
+            "truck",
+            "boat",
+            "traffic light",
+            "fire hydrant",
+            "stop sign",
+            "parking meter",
+            "bench",
+            "bird",
+            "cat",
+            "dog",
+            "horse",
+            "sheep",
+            "cow",
+            "elephant",
+            "bear",
+            "zebra",
+            "giraffe",
+            "backpack",
+            "umbrella",
+            "handbag",
+            "tie",
+            "suitcase",
+            "frisbee",
+            "skis",
+            "snowboard",
+            "sports ball",
+            "kite",
+            "baseball bat",
+            "baseball glove",
+            "skateboard",
+            "surfboard",
+            "tennis racket",
+            "bottle",
+            "wine glass",
+            "cup",
+            "fork",
+            "knife",
+            "spoon",
+            "bowl",
+            "banana",
+            "apple",
+            "sandwich",
+            "orange",
+            "broccoli",
+            "carrot",
+            "hot dog",
+            "pizza",
+            "donut",
+            "cake",
+            "chair",
+            "couch",
+            "potted plant",
+            "bed",
+            "dining table",
+            "toilet",
+            "tv",
+            "laptop",
+            "mouse",
+            "remote",
+            "keyboard",
+            "cell phone",
+            "microwave",
+            "oven",
+            "toaster",
+            "sink",
+            "refrigerator",
+            "book",
+            "clock",
+            "vase",
+            "scissors",
+            "teddy bear",
+            "hair drier",
+            "toothbrush",
+        ]
         self.sampler = sampler
 
     def __getitem__(self, index):
@@ -41,17 +131,18 @@ class Coco(datasets.coco.CocoDetection):
 
         output = torch.zeros(80, dtype=torch.long)
         for obj in target:
-            output[self.cat2cat[obj['category_id']]] = 1
+            output[self.cat2cat[obj["category_id"]]] = 1
         target = output
-        path = coco.loadImgs(img_id)[0]['file_name']
-        img = Image.open(os.path.join(self.img_dir, path)).convert('RGB')
+        path = coco.loadImgs(img_id)[0]["file_name"]
+        img = Image.open(os.path.join(self.img_dir, path)).convert("RGB")
         if self.sampler is not None:
             return self.sampler.sample(self, img, target)
-        
+
         if self.transform is not None:
             img = self.transform(img)
-            
+
         return {"out_1": img, "target": target}
+
 
 class CutoutPIL(object):
     def __init__(self, cutout_factor=0.5):
@@ -69,7 +160,11 @@ class CutoutPIL(object):
         y2 = np.clip(y_c + h_cutout // 2, 0, h)
         x1 = np.clip(x_c - w_cutout // 2, 0, w)
         x2 = np.clip(x_c + w_cutout // 2, 0, w)
-        fill_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        fill_color = (
+            random.randint(0, 255),
+            random.randint(0, 255),
+            random.randint(0, 255),
+        )
         img_draw.rectangle([x1, y1, x2, y2], fill=fill_color)
 
         return x

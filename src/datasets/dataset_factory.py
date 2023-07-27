@@ -5,6 +5,7 @@ from .dataset.LT_cifar100 import LongTailCIFAR100
 from .dataset.multi_crop_dataset import MultiCropDataset
 from .dataset.LT_imagenet.LT_imagenet import LT_Imagenet
 from .dataset.coco import Coco
+from .dataset.mixed_dataset import MixedDataset
 
 from .sample.mae import MaeSampler
 from .sample.simclr import SimCLRSampler
@@ -19,6 +20,7 @@ _dataset_factory = {
     "MULTICROP": MultiCropDataset,
     "LT_IMAGENET": LT_Imagenet,
     "COCO": Coco,
+    "MIXED": MixedDataset,
 }
 
 _sample_factory = {
@@ -30,7 +32,7 @@ _sample_factory = {
 
 
 def get_dataset(cfg):
-    sampler = _sample_factory[cfg.DATASET.SAMPLE]
+    sampler = _sample_factory[cfg.DATASET.SAMPLE](cfg)
     dataset = _dataset_factory[cfg.DATASET.DATASET]
 
     # (train_dataset, test_dataset)

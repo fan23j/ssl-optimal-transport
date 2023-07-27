@@ -7,8 +7,10 @@ class CIFAR100(CIFAR100):
 
     def __init__(self, cfg, root, train=True, download=False, sampler=None):
         super().__init__(root, train=train, download=download)
+        optional_padding = OptionalPad(fill=0, padding_enabled=cfg.DATASET.PAD_CIFAR)
         self.train_transform = transforms.Compose(
             [
+                optional_padding,
                 transforms.RandomResizedCrop(cfg.DATASET.RANDOM_RESIZED_CROP),
                 transforms.RandomHorizontalFlip(p=cfg.DATASET.RANDOM_HORIZONTAL_FLIP),
                 transforms.RandomApply(
@@ -30,13 +32,115 @@ class CIFAR100(CIFAR100):
 
         self.test_transform = transforms.Compose(
             [
+                optional_padding,
                 transforms.ToTensor(),
                 transforms.Normalize(cfg.DATASET.MEAN, cfg.DATASET.STD),
             ]
         )
 
         self.transform = self.train_transform if train else self.test_transform
-
+        self.class_labels = [
+            "apple",
+            "aquarium_fish",
+            "baby",
+            "bear",
+            "beaver",
+            "bed",
+            "bee",
+            "beetle",
+            "bicycle",
+            "bottle",
+            "bowl",
+            "boy",
+            "bridge",
+            "bus",
+            "butterfly",
+            "camel",
+            "can",
+            "castle",
+            "caterpillar",
+            "cattle",
+            "chair",
+            "chimpanzee",
+            "clock",
+            "cloud",
+            "cockroach",
+            "couch",
+            "crab",
+            "crocodile",
+            "cup",
+            "dinosaur",
+            "dolphin",
+            "elephant",
+            "flatfish",
+            "forest",
+            "fox",
+            "girl",
+            "hamster",
+            "house",
+            "kangaroo",
+            "keyboard",
+            "lamp",
+            "lawn_mower",
+            "leopard",
+            "lion",
+            "lizard",
+            "lobster",
+            "man",
+            "maple_tree",
+            "motorcycle",
+            "mountain",
+            "mouse",
+            "mushroom",
+            "oak_tree",
+            "orange",
+            "orchid",
+            "otter",
+            "palm_tree",
+            "pear",
+            "pickup_truck",
+            "pine_tree",
+            "plain",
+            "plate",
+            "poppy",
+            "porcupine",
+            "possum",
+            "rabbit",
+            "raccoon",
+            "ray",
+            "road",
+            "rocket",
+            "rose",
+            "sea",
+            "seal",
+            "shark",
+            "shrew",
+            "skunk",
+            "skyscraper",
+            "snail",
+            "snake",
+            "spider",
+            "squirrel",
+            "streetcar",
+            "sunflower",
+            "sweet_pepper",
+            "table",
+            "tank",
+            "telephone",
+            "television",
+            "tiger",
+            "tractor",
+            "train",
+            "trout",
+            "tulip",
+            "turtle",
+            "wardrobe",
+            "whale",
+            "willow_tree",
+            "wolf",
+            "woman",
+            "worm",
+        ]
         self.sampler = sampler
 
     def __getitem__(self, index):
@@ -46,3 +150,25 @@ class CIFAR100(CIFAR100):
             return self.sampler.sample(self, img, target)
 
         return img, target
+
+
+class OptionalPad(object):
+    def __init__(self, fill=0, padding_enabled=True):
+        self.padding_size = (224 - 32) // 2
+        self.fill = fill
+        self.padding_enabled = padding_enabled
+        self.padding = transforms.Pad(self.padding_size, fill=fill)
+
+    def __call__(self, x):
+        if self.padding_enabled:
+            return self.padding(x)
+        else:
+            return x  # Identity operation if padding is not enabled
+
+    def __repr__(self):
+        return (
+            self.__class__.__name__
+            + "(padding_size={0}, fill={1}, padding_enabled={2})".format(
+                self.padding_size, self.fill, self.padding_enabled
+            )
+        )
