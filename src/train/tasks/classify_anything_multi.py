@@ -21,14 +21,10 @@ class ClassifyAnythingMultiTrainer(BaseTrainer):
         )
         print("Loading pre-computed word vectors...")
         self.label_vectors = torch.load(cfg.MODEL.LABEL_VECTORS)
-        self.negative_vectors = torch.load(cfg.MODEL.NEGATIVE_VECTORS)
-
+        self.model = model
         with torch.no_grad():
             self.label_vectors = (
                 torch.tensor(self.label_vectors).float().cuda(non_blocking=True)
-            )
-            self.negative_vectors = (
-                torch.tensor(self.negative_vectors).float().cuda(non_blocking=True)
             )
 
     def train(self, epoch, data_loader, is_train=True):
@@ -48,12 +44,15 @@ class ClassifyAnythingMultiTrainer(BaseTrainer):
                     target.cuda(non_blocking=True),
                 )
                 features = self.model(data)
+                projected_label_vectors = self.model.module.labels_proj_head(
+                    self.label_vectors
+                )
 
                 loss, loss_states, cosim_softmax = self.loss(
                     features=features,
-                    labels_vector=self.label_vectors,
-                    negative_vectors=self.negative_vectors,
+                    labels_vector=projected_label_vectors,
                     targets=target,
+                    model=self.model.module,
                 )
 
                 if is_train:

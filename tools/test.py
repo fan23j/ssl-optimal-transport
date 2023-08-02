@@ -1,68 +1,32 @@
-from __future__ import absolute_import, division, print_function
-
 import argparse
-import os
-
 import torch
-import torch.utils.data
 
 import _init_paths
+from logger import Logger
 from config import cfg, update_config
 from datasets.dataset_factory import get_dataset
-from model.model import create_model, save_model
+from model.model import create_model, load_model
 from train.train_factory import train_factory
+from train.scheduler_factory import OptimizerSchedulerFactory
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    # general
     parser.add_argument(
         "--cfg", help="experiment configure file name", required=True, type=str
     )
     parser.add_argument("--local_rank", type=int, default=0)
     args = parser.parse_args()
-
     return args
 
 
 def main(cfg, local_rank):
-    torch.manual_seed(cfg.SEED)
-    torch.backends.cudnn.benchmark = cfg.CUDNN.BENCHMARK
-
     print("Creating model...")
     model = create_model(cfg.MODEL.NAME, cfg)
-
-    # create weights output directory
-    if not os.path.exists(os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID)):
-        os.makedirs(os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID))
-
     device = torch.device("cuda")
 
-    # set up optimizer
-    if cfg.TRAIN.OPTIMIZER == "adam":
-        optimizer = torch.optim.Adam(
-            model.parameters(), lr=cfg.TRAIN.LR, weight_decay=cfg.TRAIN.WD
-        )
-    elif cfg.TRAIN.OPTIMIZER == "adamw":
-        optimizer = torch.optim.AdamW(model.parameters(), cfg.TRAIN.LR)
-    elif cfg.TRAIN.OPTIMIZER == "sgd":
-        optimizer = torch.optim.SGD(
-            model.parameters(), lr=cfg.TRAIN.LR, momentum=cfg.TRAIN.MOMENTUM
-        )
-    else:
-        NotImplementedError
-
-    # load in pretrained weights if applicable
-    start_epoch = 0
-    if cfg.MODEL.INIT_WEIGHTS:
-        print("load pretrained model from {}".format(cfg.TEST.MODEL_PATH))
-        model.load_state_dict(torch.load(cfg.TEST.MODEL_PATH), strict=False)
-
-    # set up trainer code from train_factory
-    Trainer = train_factory[cfg.TEST.TASK]
-    trainer = Trainer(cfg, model, optimizer=optimizer, lr_scheduler=None)
-
-    trainer.set_device(device)
+    # set up logger
+    logger = Logger(cfg)
 
     # load in dataset
     print("Setting up data...")
@@ -75,21 +39,45 @@ def main(cfg, local_rank):
         shuffle=False,
         num_workers=1,
         pin_memory=True,
+        drop_last=cfg.TEST.DROP_LAST,
     )
 
+    # set up optimizer and scheduler
+    scheduler_factory = OptimizerSchedulerFactory(cfg, model, val_loader)
+    optimizer, lr_scheduler = scheduler_factory.create()
+
+    # load in pretrained weights
+    print("Creating model...")
+    model = create_model(cfg.MODEL.NAME, cfg)
+    print("load pretrained model from {}".format(cfg.MODEL.PRETRAINED))
+    model, optimizer, lr_scheduler, start_epoch = load_model(
+        cfg,
+        model,
+        optimizer,
+        lr_scheduler,
+    )
+    model.to(device)
+
+    # set up trainer code from train_factory
+    Trainer = train_factory[cfg.TASK]
+    trainer = Trainer(cfg, model, optimizer=optimizer, lr_scheduler=lr_scheduler)
+
+    trainer.set_device(device)
+
     print("Starting testing...")
-
     with torch.no_grad():
-        results = trainer.test(val_loader)
+        log_dict_val = trainer.val(0, val_loader)
 
-    out_path = os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID, cfg.TEST.OUTPUT_FILE)
+    for k, v in log_dict_val.items():
+        if k == "imgs":
+            logger.write_image(k, v, 0)
+        elif k == "figure":
+            logger.add_figure(k, v.gcf(), 0)
+        else:
+            logger.write("{} {:8f} | ".format(k, v))
 
-    # Write the predictions and actual labels to a file
-    # with open(out_path, "w") as f:
-    #     for label, prediction in results:
-    #         f.write(f"{label}, {prediction}\n")
-
-    # print(f"Predictions written to {out_path}")
+    logger.write("\n")
+    logger.close()
 
 
 if __name__ == "__main__":

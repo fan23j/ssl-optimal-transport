@@ -8,8 +8,9 @@ class Classify_Anything_MultiLabel_Loss(nn.Module):
     def __init__(self, cfg):
         super(Classify_Anything_MultiLabel_Loss, self).__init__()
         self.temperature = cfg.LOSS.TEMPERATURE
+        self.weight_decay = cfg.TRAIN.WD
 
-    def forward(self, features, labels_vector, targets, **kwargs):
+    def forward(self, features, labels_vector, targets, model, **kwargs):
         """
         features: [B, 300]
         label_vector: [num_class, 300]
@@ -26,6 +27,12 @@ class Classify_Anything_MultiLabel_Loss(nn.Module):
         pos_loss = -torch.log(cosim_matrix_sigmoid[pos_mask]).mean()
         neg_loss = -torch.log(1 - cosim_matrix_sigmoid[neg_mask]).mean()
 
-        loss = pos_loss + neg_loss
+        # Compute L2 regularization loss
+        l2_reg = 0.0
+        for name, param in model.named_parameters():
+            if "weight" in name:
+                l2_reg += torch.norm(param).item()
+
+        loss = pos_loss + neg_loss + self.weight_decay * l2_reg
 
         return {"classify_anything_loss": loss}, cosim_matrix

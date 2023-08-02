@@ -32,7 +32,9 @@ _sample_factory = {
 
 
 def get_dataset(cfg):
-    sampler = _sample_factory[cfg.DATASET.SAMPLE](cfg)
+    sampler = _sample_factory[cfg.DATASET.SAMPLE]
+    if sampler is not None:
+        sampler = sampler(cfg)
     dataset = _dataset_factory[cfg.DATASET.DATASET]
 
     # (train_dataset, test_dataset)

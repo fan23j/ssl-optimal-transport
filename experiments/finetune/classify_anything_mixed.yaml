@@ -1,5 +1,5 @@
 DATA_DIR: "/home/main/data/coco"
-EXP_ID: "classify_anything_mixed"
+EXP_ID: "classify_anything_mixed_test"
 TASK: "classify_anything_mixed"
 DEBUG: 0
 DEBUG_THEME: "white"
@@ -18,8 +18,8 @@ CUDNN:
     BENCHMARK: true
 
 MODEL:
-    INIT_WEIGHTS: false
-    PRETRAINED: ""
+    INIT_WEIGHTS: true
+    PRETRAINED: "/home/main/ssl-optimal-transport/runs/finetune/classify_anything_mixed/model_best.pth"
     NAME: "resnet50_imagenet"
     HEADS: ["projection", "reshape"]
     INPUT_H: 224
@@ -52,7 +52,7 @@ TRAIN:
     LOCAL_RANK: 0
     HIDE_DATA_TIME: false
     SAVE_ALL_MODEL: false
-    RESUME: true
+    RESUME: false
     EPOCHS: 100
     NUM_ITERS: -1
     LR: 1e-3

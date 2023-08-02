@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 from PIL import Image
 from .sampler import Sampler
 
@@ -7,10 +8,13 @@ class ClassifyAnythingSampler(Sampler):
     """Sampler for ClassifyAnything."""
 
     def sample(self, dataset, img, target):
-        try:
-            img = Image.fromarray(img)
-        except TypeError:
-            pass
+        if isinstance(img, np.ndarray):
+            try:
+                img = Image.fromarray(img)
+            except TypeError:
+                pass
+        elif not isinstance(img, Image.Image):
+            print(f"Unknown type for img: {type(img)}")
 
         if dataset.transform is not None:
             out = dataset.transform(img)

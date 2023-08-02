@@ -12,6 +12,12 @@ class ProjectionHead(nn.Module):
             nn.Linear(cfg.MODEL.HEAD_INPUT_DIM, cfg.MODEL.HIDDEN_MLP, bias=False),
             nn.BatchNorm1d(cfg.MODEL.HIDDEN_MLP),
             nn.ReLU(inplace=True),
+            nn.Linear(cfg.MODEL.HIDDEN_MLP, cfg.MODEL.HIDDEN_MLP, bias=False),
+            nn.BatchNorm1d(cfg.MODEL.HIDDEN_MLP),
+            nn.ReLU(inplace=True),
+            nn.Linear(cfg.MODEL.HIDDEN_MLP, cfg.MODEL.HIDDEN_MLP, bias=False),
+            nn.BatchNorm1d(cfg.MODEL.HIDDEN_MLP),
+            nn.ReLU(inplace=True),
             nn.Linear(cfg.MODEL.HIDDEN_MLP, cfg.MODEL.FEATURE_DIM, bias=True),
         )
 
