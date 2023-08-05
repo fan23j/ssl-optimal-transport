@@ -13,6 +13,7 @@ from randaugment import RandAugment
 class Coco(datasets.coco.CocoDetection):
     def __init__(self, cfg, root, train=True, download=False, sampler=None):
         self.root = root
+        self.name = "coco"
         self.annotation_file = (
             cfg.DATASET.TRAIN_ANNOTATIONS if train else cfg.DATASET.VAL_ANNOTATIONS
         )

@@ -7,6 +7,7 @@ class CIFAR100(CIFAR100):
 
     def __init__(self, cfg, root, train=True, download=False, sampler=None):
         super().__init__(root, train=train, download=download)
+        self.name = "cifar100"
         optional_padding = OptionalPad(fill=0, padding_enabled=cfg.DATASET.PAD_CIFAR)
         self.train_transform = transforms.Compose(
             [

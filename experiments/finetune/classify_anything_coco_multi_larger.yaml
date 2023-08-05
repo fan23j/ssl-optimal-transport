@@ -26,7 +26,7 @@ MODEL:
     INPUT_W: 448
     HEAD_INPUT_DIM: 1000
     LABEL_VECTORS: "/home/main/ssl-optimal-transport/weights/coco_label_vectors.pt"
-    OUTPUT_FEATURES: 300
+    OUTPUT_FEATURES: 100
 
 LOSS:
     METRIC: ["classify_anything_multi"]
@@ -146,5 +146,5 @@ TRAIN:
     TRAINVAL: false
 
 TEST:
-    BATCH_SIZE: 128
+    BATCH_SIZE: 64
     DROP_LAST: true

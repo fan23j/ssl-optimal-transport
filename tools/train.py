@@ -116,7 +116,13 @@ def main(cfg, local_rank):
 
     # set up trainer code from train_factory
     Trainer = train_factory[cfg.TASK]
-    trainer = Trainer(cfg, model, optimizer=optimizer, lr_scheduler=lr_scheduler)
+    trainer = Trainer(
+        cfg,
+        model,
+        optimizer=optimizer,
+        lr_scheduler=lr_scheduler,
+        dataset=train_dataset,
+    )
 
     if cfg.TRAIN.MASTER_BATCH_SIZE == -1:
         master_batch_size = cfg.TRAIN.BATCH_SIZE // len(cfg.GPUS)

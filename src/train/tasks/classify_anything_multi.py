@@ -43,7 +43,9 @@ class ClassifyAnythingMultiTrainer(BaseTrainer):
                     data.cuda(non_blocking=True),
                     target.cuda(non_blocking=True),
                 )
+
                 features = self.model(data)
+
                 projected_label_vectors = self.model.module.labels_proj_head(
                     self.label_vectors
                 )

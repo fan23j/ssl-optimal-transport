@@ -44,7 +44,7 @@ class BackBone(nn.Module):
             [_head_factory[head_name](cfg) for head_name in cfg.MODEL.HEADS]
         )
         self.labels_proj_head = nn.Sequential(
-            nn.Linear(cfg.MODEL.OUTPUT_FEATURES, 2048),
+            nn.Linear(300, 2048),
             nn.ReLU(),
             nn.Linear(2048, cfg.MODEL.OUTPUT_FEATURES),
         )

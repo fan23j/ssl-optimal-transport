@@ -1,5 +1,5 @@
 DATA_DIR: "/home/main/data/coco"
-EXP_ID: "coco_multi"
+EXP_ID: "coco_multi_448"
 TASK: "multiclass_linear"
 DEBUG: 0
 DEBUG_THEME: "white"
@@ -22,8 +22,8 @@ MODEL:
     PRETRAINED: ""
     NAME: "resnet50_imagenet"
     HEADS: ["linear"]
-    INPUT_H: 224
-    INPUT_W: 224
+    INPUT_H: 448
+    INPUT_W: 448
     HEAD_INPUT_DIM: 1000
 
 LOSS:
@@ -35,7 +35,7 @@ DATASET:
     TRAIN_SET: "train"
     TEST_SET: "valid"
     NUM_CLASSES: 80
-    IMAGE_SIZE: 224
+    IMAGE_SIZE: 448
     TRAIN_IMAGE_DIR: "images/train"
     VAL_IMAGE_DIR: "images/val"
     TRAIN_ANNOTATIONS: "annotations/annotations/instances_train2017.json"
@@ -50,9 +50,9 @@ TRAIN:
     RESUME: false
     EPOCHS: 100
     NUM_ITERS: -1
-    LR: 1e-3
-    WD: 0.1
-    BATCH_SIZE: 128
+    LR: 1e-4
+    WD: 1e-4
+    BATCH_SIZE: 64
     WARMUP_EPOCHS: 20
 
     CHECKPOINT: ""
@@ -61,5 +61,5 @@ TRAIN:
     TRAINVAL: false
 
 TEST:
-    BATCH_SIZE: 128
+    BATCH_SIZE: 64
     DROP_LAST: true
