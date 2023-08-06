@@ -8,7 +8,11 @@ class CIFAR100(CIFAR100):
     def __init__(self, cfg, root, train=True, download=False, sampler=None):
         super().__init__(root, train=train, download=download)
         self.name = "cifar100"
-        optional_padding = OptionalPad(fill=0, padding_enabled=cfg.DATASET.PAD_CIFAR)
+        optional_padding = OptionalPad(
+            fill=0,
+            padding_enabled=cfg.DATASET.PAD_CIFAR,
+            image_size=cfg.DATASET.IMAGE_SIZE,
+        )
         self.train_transform = transforms.Compose(
             [
                 optional_padding,
@@ -154,8 +158,8 @@ class CIFAR100(CIFAR100):
 
 
 class OptionalPad(object):
-    def __init__(self, fill=0, padding_enabled=True):
-        self.padding_size = (224 - 32) // 2
+    def __init__(self, fill=0, padding_enabled=True, image_size=224):
+        self.padding_size = (image_size - 32) // 2
         self.fill = fill
         self.padding_enabled = padding_enabled
         self.padding = transforms.Pad(self.padding_size, fill=fill)

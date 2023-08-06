@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 
 class ClassifyAnythingMultiTrainer(BaseTrainer):
-    def __init__(self, cfg, model, optimizer, lr_scheduler):
+    def __init__(self, cfg, model, optimizer, lr_scheduler, dataset):
         super(ClassifyAnythingMultiTrainer, self).__init__(
             cfg, model, optimizer, lr_scheduler
         )

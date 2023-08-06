@@ -65,14 +65,6 @@ class Classify_Anything_MultiLabel_Loss(nn.Module):
 
         cosim_matrix = torch.matmul(features, labels_vector.t()) / self.temperature
 
-        loss = self.asym_loss(cosim_matrix, targets)
-
-        # Compute L2 regularization loss
-        l2_reg = 0.0
-        for name, param in model.named_parameters():
-            if "weight" in name:
-                l2_reg += torch.norm(param).item()
-
-        total_loss = loss + self.weight_decay * l2_reg
+        total_loss = self.asym_loss(cosim_matrix, targets)
 
         return {"classify_anything_loss": total_loss}, cosim_matrix

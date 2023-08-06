@@ -121,7 +121,8 @@ def main(cfg, local_rank):
         model,
         optimizer=optimizer,
         lr_scheduler=lr_scheduler,
-        dataset=train_dataset,
+        train_dataset=train_dataset,
+        val_dataset=val_dataset,
     )
 
     if cfg.TRAIN.MASTER_BATCH_SIZE == -1:

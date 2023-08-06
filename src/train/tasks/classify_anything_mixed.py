@@ -16,9 +16,9 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 
 class ClassifyAnythingMixedTrainer(BaseTrainer):
-    def __init__(self, cfg, model, optimizer, lr_scheduler, dataset):
+    def __init__(self, cfg, model, optimizer, lr_scheduler, train_dataset, val_dataset):
         super(ClassifyAnythingMixedTrainer, self).__init__(
-            cfg, model, optimizer, lr_scheduler, dataset
+            cfg, model, optimizer, lr_scheduler, train_dataset, val_dataset
         )
         print("Loading pre-computed word vectors...")
         self.label_vectors = torch.load(cfg.MODEL.LABEL_VECTORS)
@@ -41,7 +41,7 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
         total_correct_1 = 0
         total_correct_5 = 0
         with torch.enable_grad() if is_train else torch.no_grad():
-            self.dataset.on_epoch_start()
+            self.train_dataset.on_epoch_start() if is_train else self.val_dataset.on_epoch_start()
             for it, (batch_data, dataset_indices) in enumerate(data_bar):
                 data, targets = batch_data["out_1"], batch_data["target"]
 
