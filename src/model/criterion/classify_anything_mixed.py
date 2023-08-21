@@ -37,9 +37,6 @@ class Classify_Anything_Mixed_Loss(nn.Module):
         cifar_indices = dataset_indices == 1
         coco_indices = dataset_indices == 0
 
-        coco_features = features[coco_indices.nonzero().squeeze()]
-        cifar_features = features[cifar_indices.nonzero().squeeze()]
-
         coco_targets = targets[coco_indices.nonzero().squeeze().to("cpu")]
         cifar_targets = targets[cifar_indices.nonzero().squeeze().to("cpu")]
 
@@ -47,7 +44,7 @@ class Classify_Anything_Mixed_Loss(nn.Module):
         cifar_cosim_matrix = cosim_matrix[cifar_indices.nonzero().squeeze()]
 
         # Compute the COCO loss using asym_loss
-        coco_loss = self.asym_loss(coco_cosim_matrix, coco_targets.to("cuda"))
+        coco_loss = self.asym_loss(coco_cosim_matrix, coco_targets.to("cuda")) * 3
 
         # Convert CIFAR one-hot targets to class labels for cross_entropy
         cifar_labels = torch.argmax(cifar_targets, dim=1)

@@ -1,5 +1,10 @@
 einops
 timm
-tensorboard
+tensorboardX
 gensim
 randaugment
+yacs
+ftfy
+regex
+tqdm
+git+https://github.com/openai/CLIP.git

@@ -7,8 +7,10 @@ from ..base_trainer import BaseTrainer
 
 
 class SimCLRPreTrainer(BaseTrainer):
-    def __init__(self, cfg, model, optimizer, lr_scheduler):
-        super(SimCLRPreTrainer, self).__init__(cfg, model, optimizer, lr_scheduler)
+    def __init__(self, cfg, model, optimizer, lr_scheduler, train_dataset, val_dataset):
+        super(SimCLRPreTrainer, self).__init__(
+            cfg, model, optimizer, lr_scheduler, train_dataset, val_dataset
+        )
         self.supervision = None
         # ============ MAE supervision ============
         if self.cfg.MODEL.SUPERVISION != "":

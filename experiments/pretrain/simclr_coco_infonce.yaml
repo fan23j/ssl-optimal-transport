@@ -1,14 +1,14 @@
 DATA_DIR: "/home/main/data/coco"
-EXP_ID: "classify_anything_mixed_clip"
-TASK: "classify_anything_mixed"
+EXP_ID: "simclr_coco_infonce"
+TASK: "simclr_pretrain"
 DEBUG: 0
 DEBUG_THEME: "white"
 SEED: 317
-OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/finetune"
+OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/pretrain"
 LOG_DIR: ""
 EXPERIMENT_NAME: ""
 GPUS: [0]
-WORKERS: 0
+WORKERS: 8
 PRINT_FREQ: 0
 PIN_MEMORY: true
 RANK: 0
@@ -18,53 +18,52 @@ CUDNN:
     BENCHMARK: true
 
 MODEL:
-    INIT_WEIGHTS: true
-    PRETRAINED: "/home/main/ssl-optimal-transport/runs/finetune/classify_anything_coco_multi_larger_img_no_reg/model_best.pth"
-    NAME: "clip"
-    HEADS: ["projection", "reshape"]
+    INIT_WEIGHTS: false
+    PRETRAINED: "/data/pretrained_models/imagenet/hrnet_w32-36af842e.pth"
+    FEATURE_DIM: 128
+    NAME: "resnet50_imagenet"
+    HEADS: ["projection"]
     INPUT_H: 448
     INPUT_W: 448
     HEAD_INPUT_DIM: 1000
-    LABEL_VECTORS: "/home/main/ssl-optimal-transport/weights/mixed_label_vectors.pt"
-    OUTPUT_FEATURES: 100
 
 LOSS:
-    METRIC: ["classify_anything_mixed"]
+    METRIC: ["infonce"]
     TEMPERATURE: 0.5
 
 DATASET:
-    DATASET: "MIXED"
-    SAMPLE: "CLASSIFY_ANYTHING"
+    DATASET: "COCO"
+    SAMPLE: "SIMCLR"
     TRAIN_SET: "train"
     TEST_SET: "valid"
-    NUM_CLASSES: 168
+
+    # training data augmentation
     IMAGE_SIZE: 448
     TRAIN_IMAGE_DIR: "images/train"
     VAL_IMAGE_DIR: "images/val"
     TRAIN_ANNOTATIONS: "annotations/annotations/instances_train2017.json"
     VAL_ANNOTATIONS: "annotations/annotations/instances_val2017.json"
-    PAD_CIFAR: true
     RANDOM_RESIZED_CROP: 448
 
 TRAIN:
-    OPTIMIZER: "adamw"
+    OPTIMIZER: "adam"
     DISTRIBUTE: false
     LOCAL_RANK: 0
     HIDE_DATA_TIME: false
     SAVE_ALL_MODEL: false
     RESUME: false
-    EPOCHS: 100
+    EPOCHS: 500
     NUM_ITERS: -1
-    LR: 1e-4
-    WD: 1e-4
-    BATCH_SIZE: 64
-    WARMUP_EPOCHS: 20
+    LR: 1e-3
+    WD: 1e-6
+    BATCH_SIZE: 32
 
     CHECKPOINT: ""
     SHUFFLE: true
-    VAL_INTERVALS: 1
+    VAL_INTERVALS: 0
     TRAINVAL: false
 
 TEST:
-    BATCH_SIZE: 64
-    DROP_LAST: true
+    # Test Model Epoch
+    MODEL_PATH: "/home/tensorboy/data/centerpose/model_zoo/mobilenetV3_1x.pth"
+    TASK: "simclr_linear"

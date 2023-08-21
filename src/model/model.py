@@ -5,7 +5,7 @@ import torch.nn as nn
 
 from .backbones.resnet50 import get_resnet50
 from .backbones.vit_tiny import get_vit_tiny
-
+from .backbones.clip import get_clip_b16
 
 from .heads.projection_head import ProjectionHead
 from .heads.linear_classifier_head import LinearClassifierHead
@@ -23,6 +23,7 @@ _backbone_factory = {
     "resnet50": get_resnet50,
     "vit_tiny": get_vit_tiny,
     "resnet50_imagenet": get_resnet50_imagenet,
+    "clip": get_clip_b16,
 }
 
 _head_factory = {
@@ -46,6 +47,8 @@ class BackBone(nn.Module):
         self.labels_proj_head = nn.Sequential(
             nn.Linear(300, 2048),
             nn.ReLU(),
+            # nn.Linear(2048, 2048),
+            # nn.ReLU(),
             nn.Linear(2048, cfg.MODEL.OUTPUT_FEATURES),
         )
 

@@ -5,8 +5,11 @@ from .sampler import Sampler
 class SimCLRSampler(Sampler):
     """Sampler for SimCLR."""
 
-    def sample(dataset, img, target):
-        img = Image.fromarray(img)
+    def sample(self, dataset, img, target):
+        try:
+            img = Image.fromarray(img)
+        except AttributeError:
+            pass
 
         if dataset.transform is not None:
             out_1 = dataset.transform(img)

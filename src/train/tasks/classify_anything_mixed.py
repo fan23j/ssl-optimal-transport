@@ -40,6 +40,7 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
         all_preds = []
         total_correct_1 = 0
         total_correct_5 = 0
+        cifar_sample_count = 0
         with torch.enable_grad() if is_train else torch.no_grad():
             self.train_dataset.on_epoch_start() if is_train else self.val_dataset.on_epoch_start()
             for it, (batch_data, dataset_indices) in enumerate(data_bar):
@@ -48,10 +49,12 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
                 data = data.cuda(non_blocking=True)
 
                 features = self.model(data)
-
+                projected_label_vectors = self.model.module.labels_proj_head(
+                    self.label_vectors
+                )
                 loss, loss_states, cosim_matrices = self.loss(
                     features=features,
-                    label_vectors=self.label_vectors,
+                    label_vectors=projected_label_vectors,
                     targets=targets,
                     dataset_indices=dataset_indices,
                     model=self.model.module,
@@ -65,7 +68,7 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
 
                 # Converting one-hot encoded CIFAR targets to class indices
                 _, cifar_targets_indices = cifar_targets.max(dim=1)
-
+                cifar_sample_count += len(cifar_targets_indices)
                 if is_train:
                     self.optimizer.zero_grad()
                     loss.backward()
@@ -121,8 +124,8 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
                     .float()
                 ).item()
 
-                top1_acc = (total_correct_1 / len(data_loader.dataset)) * 100
-                top5_acc = (total_correct_5 / len(data_loader.dataset)) * 100
+                top1_acc = (total_correct_1 / cifar_sample_count) * 100
+                top5_acc = (total_correct_5 / cifar_sample_count) * 100
 
                 data_bar.set_description(
                     "{} Epoch: [{}/{}] {} COCO mAP: {:.2f}%, CIFAR Top-1: {:.2f}%, Top-5: {:.2f}%".format(

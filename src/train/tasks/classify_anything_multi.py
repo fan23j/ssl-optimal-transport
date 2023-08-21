@@ -15,9 +15,9 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 
 class ClassifyAnythingMultiTrainer(BaseTrainer):
-    def __init__(self, cfg, model, optimizer, lr_scheduler, dataset):
+    def __init__(self, cfg, model, optimizer, lr_scheduler, train_dataset, val_dataset):
         super(ClassifyAnythingMultiTrainer, self).__init__(
-            cfg, model, optimizer, lr_scheduler
+            cfg, model, optimizer, lr_scheduler, train_dataset, val_dataset
         )
         print("Loading pre-computed word vectors...")
         self.label_vectors = torch.load(cfg.MODEL.LABEL_VECTORS)

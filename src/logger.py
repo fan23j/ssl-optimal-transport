@@ -53,6 +53,11 @@ class Logger(object):
             )
         except:
             pass
+
+        yaml_filename = os.path.join(log_dir, "config.yaml")
+        with open(yaml_filename, "w") as yaml_file:
+            yaml_file.write(cfg.dump())
+
         self.start_line = True
 
     def write(self, txt):

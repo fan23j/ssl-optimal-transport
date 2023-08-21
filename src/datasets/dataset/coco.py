@@ -36,6 +36,7 @@ class Coco(datasets.coco.CocoDetection):
                 transforms.ToTensor(),
             ]
         )
+        self.target_transform = None
         self.transform = self.train_transform if train else self.test_transform
         self.cat2cat = dict()
         for cat in self.coco.cats.keys():
