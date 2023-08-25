@@ -9,17 +9,17 @@ class Classify_Anything_Loss(nn.Module):
         super(Classify_Anything_Loss, self).__init__()
         self.temperature = cfg.LOSS.TEMPERATURE
 
-    def forward(self, features, labels_vector, targets, **kwargs):
+    def forward(self, features, text_features, targets, **kwargs):
         """
         features: [B, 300]
-        label_vector: [num_class, 300]
+        text_features: [num_class, 512]
         targets: [B]
         """
         # Normalize features and labels_vector along the feature dimension
         # features_norm = F.normalize(features, dim=1)
         # labels_vector_norm = F.normalize(labels_vector, dim=1)
 
-        cosim_matrix = torch.matmul(features, labels_vector.t()) / self.temperature
+        cosim_matrix = torch.matmul(features, text_features.t()) / self.temperature
 
         cosim_softmax = F.softmax(cosim_matrix, dim=1)
 

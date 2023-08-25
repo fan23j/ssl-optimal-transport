@@ -7,17 +7,13 @@ from ..base_trainer import BaseTrainer
 
 
 class ClassifyAnythingSingleTrainer(BaseTrainer):
-    def __init__(self, cfg, model, optimizer, lr_scheduler):
+    def __init__(self, cfg, model, optimizer, lr_scheduler, train_dataset, val_dataset):
         super(ClassifyAnythingSingleTrainer, self).__init__(
-            cfg, model, optimizer, lr_scheduler
+            cfg, model, optimizer, lr_scheduler, train_dataset, val_dataset
         )
-        print("Loading pre-computed word vectors...")
-        self.label_vectors = torch.load(cfg.MODEL.LABEL_VECTORS)
-
-        with torch.no_grad():
-            self.label_vectors = (
-                torch.tensor(self.label_vectors).float().cuda(non_blocking=True)
-            )
+        self.train_dataset = train_dataset
+        self.val_dataset = val_dataset
+        self.dataset = train_dataset
 
     def train(self, epoch, data_loader, is_train=True):
         self.model.train() if is_train else self.model.eval()
@@ -40,8 +36,16 @@ class ClassifyAnythingSingleTrainer(BaseTrainer):
                 )
                 features = self.model(data)
 
+                text_features = self.model.module.backbone_model.encode_text(
+                    self.dataset.text_inputs.to("cuda")
+                )
+                text_features = text_features / text_features.norm(dim=-1, keepdim=True)
+
                 loss, loss_states, cosim_softmax = self.loss(
-                    features, self.label_vectors, target
+                    features=features,
+                    text_features=text_features,
+                    targets=target,
+                    model=self.model.module,
                 )
 
                 if is_train:

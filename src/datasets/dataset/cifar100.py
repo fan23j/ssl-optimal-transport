@@ -1,5 +1,7 @@
 from torchvision.datasets import CIFAR100
 import torchvision.transforms as transforms
+import torch
+import clip
 
 
 class CIFAR100(CIFAR100):
@@ -41,6 +43,13 @@ class CIFAR100(CIFAR100):
                 transforms.ToTensor(),
                 transforms.Normalize(cfg.DATASET.MEAN, cfg.DATASET.STD),
             ]
+        )
+        descriptions = [
+            "a photo that contains a " + category for category in self.classes
+        ]
+        # Tokenize
+        self.text_inputs = torch.cat(
+            [clip.tokenize(description) for description in descriptions]
         )
 
         self.transform = self.train_transform if train else self.test_transform

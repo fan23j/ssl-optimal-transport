@@ -19,7 +19,7 @@ CUDNN:
 
 MODEL:
     INIT_WEIGHTS: false
-    PRETRAINED: "/home/main/ssl-optimal-transport/runs/finetune/classify_anything_coco_multi/model_last.pth"
+    PRETRAINED: "/home/main/ssl-optimal-transport/runs/finetune/classify_anything_coco_multi_clip/model_last.pth"
     NAME: "clip"
     HEADS: ["projection", "reshape"]
     INPUT_H: 224
