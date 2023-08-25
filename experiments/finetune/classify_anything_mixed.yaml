@@ -1,5 +1,5 @@
 DATA_DIR: "/home/main/data/coco"
-EXP_ID: "classify_anything_mixed_clip"
+EXP_ID: "classify_anything_mixed_clip_ema"
 TASK: "classify_anything_mixed"
 DEBUG: 0
 DEBUG_THEME: "white"
@@ -19,14 +19,15 @@ CUDNN:
 
 MODEL:
     INIT_WEIGHTS: true
-    PRETRAINED: "/home/main/ssl-optimal-transport/runs/finetune/classify_anything_coco_multi_larger_img_no_reg/model_best.pth"
+    PRETRAINED: "/home/main/ssl-optimal-transport/runs/finetune/classify_anything_mixed_clip_ema/model_last.pth"
     NAME: "clip"
     HEADS: ["projection", "reshape"]
-    INPUT_H: 448
-    INPUT_W: 448
-    HEAD_INPUT_DIM: 1000
+    INPUT_H: 224
+    INPUT_W: 224
+    HEAD_INPUT_DIM: 512
     LABEL_VECTORS: "/home/main/ssl-optimal-transport/weights/mixed_label_vectors.pt"
-    OUTPUT_FEATURES: 100
+    OUTPUT_FEATURES: 512
+    HIDDEN_MLP: 1048
 
 LOSS:
     METRIC: ["classify_anything_mixed"]
@@ -38,13 +39,13 @@ DATASET:
     TRAIN_SET: "train"
     TEST_SET: "valid"
     NUM_CLASSES: 168
-    IMAGE_SIZE: 448
+    IMAGE_SIZE: 224
     TRAIN_IMAGE_DIR: "images/train"
     VAL_IMAGE_DIR: "images/val"
     TRAIN_ANNOTATIONS: "annotations/annotations/instances_train2017.json"
     VAL_ANNOTATIONS: "annotations/annotations/instances_val2017.json"
     PAD_CIFAR: true
-    RANDOM_RESIZED_CROP: 448
+    RANDOM_RESIZED_CROP: 224
 
 TRAIN:
     OPTIMIZER: "adamw"
@@ -52,10 +53,10 @@ TRAIN:
     LOCAL_RANK: 0
     HIDE_DATA_TIME: false
     SAVE_ALL_MODEL: false
-    RESUME: false
-    EPOCHS: 100
+    RESUME: true
+    EPOCHS: 50
     NUM_ITERS: -1
-    LR: 1e-4
+    LR: 3e-5
     WD: 1e-4
     BATCH_SIZE: 64
     WARMUP_EPOCHS: 20

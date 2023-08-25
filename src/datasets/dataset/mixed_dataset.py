@@ -2,6 +2,7 @@ from torch.utils.data import Dataset
 from .coco import Coco
 from .cifar100 import CIFAR100
 import torch
+import clip
 
 
 class MixedDataset(Dataset):
@@ -17,6 +18,19 @@ class MixedDataset(Dataset):
         self.cifar_len = len(self.cifar_dataset)
         self.total_len = self.coco_len + self.cifar_len
         self.epoch_counter = 0
+        self.all_unique_categories = list(
+            set(self.coco_dataset.all_categories + self.cifar_dataset.classes)
+        )
+
+        descriptions = [
+            "a photo that contains a " + category
+            for category in self.all_unique_categories
+        ]
+
+        # Tokenize
+        self.text_inputs = torch.cat(
+            [clip.tokenize(description) for description in descriptions]
+        )
 
     def on_epoch_start(self):
         self.coco_permutation = torch.randperm(self.coco_len)

@@ -3,6 +3,7 @@ import os
 import torch
 import torchvision.transforms as transforms
 import random
+import clip
 
 from torchvision import datasets
 from pycocotools.coco import COCO
@@ -41,6 +42,16 @@ class Coco(datasets.coco.CocoDetection):
         self.cat2cat = dict()
         for cat in self.coco.cats.keys():
             self.cat2cat[cat] = len(self.cat2cat)
+        self.all_categories = [
+            cat["name"] for cat in self.coco.loadCats(self.coco.getCatIds())
+        ]
+        descriptions = [
+            "a photo that contains a " + category for category in self.all_categories
+        ]
+        # Tokenize
+        self.text_inputs = torch.cat(
+            [clip.tokenize(description) for description in descriptions]
+        )
         self.class_labels = [
             "person",
             "bicycle",

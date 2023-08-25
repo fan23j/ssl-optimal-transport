@@ -20,20 +20,14 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
         super(ClassifyAnythingMixedTrainer, self).__init__(
             cfg, model, optimizer, lr_scheduler, train_dataset, val_dataset
         )
-        print("Loading pre-computed word vectors...")
-        self.label_vectors = torch.load(cfg.MODEL.LABEL_VECTORS)
-
-        # Stack the label vectors from the dictionary
-        self.label_vectors = {k: torch.tensor(v) for k, v in self.label_vectors.items()}
-        self.label_vectors = torch.stack(list(self.label_vectors.values())).squeeze(1)
-
-        with torch.no_grad():
-            self.label_vectors = self.label_vectors.cuda()
+        self.train_dataset = train_dataset
+        self.val_dataset = val_dataset
+        self.dataset = train_dataset
 
     def train(self, epoch, data_loader, is_train=True):
         self.model.train() if is_train else self.model.eval()
         data_bar = tqdm(data_loader)
-
+        self.dataset = self.train_dataset if is_train else self.val_dataset
         average_loss_states = {}
         # collect all targets and predictions
         all_targets = []
@@ -42,22 +36,25 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
         total_correct_5 = 0
         cifar_sample_count = 0
         with torch.enable_grad() if is_train else torch.no_grad():
-            self.train_dataset.on_epoch_start() if is_train else self.val_dataset.on_epoch_start()
+            self.dataset.on_epoch_start()
+            if not is_train:
+                self.ema_model.apply_shadow()
             for it, (batch_data, dataset_indices) in enumerate(data_bar):
                 data, targets = batch_data["out_1"], batch_data["target"]
 
                 data = data.cuda(non_blocking=True)
 
                 features = self.model(data)
-                projected_label_vectors = self.model.module.labels_proj_head(
-                    self.label_vectors
+
+                text_features = self.model.module.backbone_model.encode_text(
+                    self.dataset.text_inputs.to("cuda")
                 )
+                text_features = text_features / text_features.norm(dim=-1, keepdim=True)
                 loss, loss_states, cosim_matrices = self.loss(
                     features=features,
-                    label_vectors=projected_label_vectors,
+                    text_features=text_features,
                     targets=targets,
                     dataset_indices=dataset_indices,
-                    model=self.model.module,
                 )
 
                 coco_cosim, cifar_cosim = cosim_matrices

@@ -1,5 +1,5 @@
 DATA_DIR: "/home/main/data/coco"
-EXP_ID: "classify_anything_coco_multi"
+EXP_ID: "classify_anything_coco_multi_clip"
 TASK: "classify_anything_multi"
 DEBUG: 0
 DEBUG_THEME: "white"
@@ -18,16 +18,16 @@ CUDNN:
     BENCHMARK: true
 
 MODEL:
-    INIT_WEIGHTS: true
+    INIT_WEIGHTS: false
     PRETRAINED: "/home/main/ssl-optimal-transport/runs/finetune/classify_anything_coco_multi/model_last.pth"
-    NAME: "resnet50_imagenet"
+    NAME: "clip"
     HEADS: ["projection", "reshape"]
     INPUT_H: 224
     INPUT_W: 224
-    HEAD_INPUT_DIM: 1000
-    LABEL_VECTORS: "/home/main/ssl-optimal-transport/weights/coco_label_vectors.pt"
-    NEGATIVE_VECTORS: "/home/main/ssl-optimal-transport/weights/coco_negative_vectors.pt"
-    OUTPUT_FEATURES: 300
+    HEAD_INPUT_DIM: 512
+    LABEL_VECTORS: "/home/main/ssl-optimal-transport/weights/mixed_label_vectors.pt"
+    OUTPUT_FEATURES: 512
+    HIDDEN_MLP: 1048
 
 LOSS:
     METRIC: ["classify_anything_multi"]
@@ -133,12 +133,12 @@ TRAIN:
     LOCAL_RANK: 0
     HIDE_DATA_TIME: false
     SAVE_ALL_MODEL: false
-    RESUME: true
-    EPOCHS: 100
+    RESUME: false
+    EPOCHS: 50
     NUM_ITERS: -1
-    LR: 1e-3
-    WD: 0.1
-    BATCH_SIZE: 128
+    LR: 3e-5
+    WD: 1e-4
+    BATCH_SIZE: 64
     WARMUP_EPOCHS: 20
 
     CHECKPOINT: ""

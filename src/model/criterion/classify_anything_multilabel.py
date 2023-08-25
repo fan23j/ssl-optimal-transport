@@ -56,14 +56,14 @@ class Classify_Anything_MultiLabel_Loss(nn.Module):
             gamma_neg, gamma_pos, clip, eps, disable_torch_grad_focal_loss
         )
 
-    def forward(self, features, labels_vector, targets, model, **kwargs):
+    def forward(self, features, text_features, targets, model, **kwargs):
         """
         features: [B, 300]
-        label_vector: [num_class, 300]
+        text_features: [num_class, 512]
         targets: [B, num_class]
         """
 
-        cosim_matrix = torch.matmul(features, labels_vector.t()) / self.temperature
+        cosim_matrix = torch.matmul(features, text_features.t()) / self.temperature
 
         total_loss = self.asym_loss(cosim_matrix, targets)
 

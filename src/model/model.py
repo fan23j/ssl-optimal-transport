@@ -2,10 +2,10 @@ from __future__ import absolute_import, division, print_function
 
 import torch
 import torch.nn as nn
+import clip
 
 from .backbones.resnet50 import get_resnet50
 from .backbones.vit_tiny import get_vit_tiny
-from .backbones.clip import get_clip_b16
 
 from .heads.projection_head import ProjectionHead
 from .heads.linear_classifier_head import LinearClassifierHead
@@ -17,6 +17,11 @@ from .heads.reshape_head import ReshapeHead
 
 def get_resnet50_imagenet(cfg):
     return torch.hub.load("facebookresearch/swav:main", "resnet50")
+
+
+def get_clip_b16(cfg=None):
+    model, _ = clip.load("ViT-B/16", jit=False)
+    return model.float()
 
 
 _backbone_factory = {
@@ -47,13 +52,14 @@ class BackBone(nn.Module):
         self.labels_proj_head = nn.Sequential(
             nn.Linear(300, 2048),
             nn.ReLU(),
-            # nn.Linear(2048, 2048),
-            # nn.ReLU(),
             nn.Linear(2048, cfg.MODEL.OUTPUT_FEATURES),
         )
 
     def forward(self, x):
-        x = self.backbone_model(x)
+        try:
+            x = self.backbone_model(x)
+        except TypeError:
+            x = self.backbone_model.encode_image(x)
         for head in self.heads:
             x = head(x)
         return x

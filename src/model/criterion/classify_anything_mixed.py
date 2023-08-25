@@ -21,17 +21,15 @@ class Classify_Anything_Mixed_Loss(nn.Module):
             gamma_neg, gamma_pos, clip, eps, disable_torch_grad_focal_loss
         )
 
-    def forward(
-        self, features, label_vectors, targets, dataset_indices, model, **kwargs
-    ):
+    def forward(self, features, text_features, targets, dataset_indices, **kwargs):
         """
-        features: [B, 300]
-        label_vectors: [num_class, 300]
+        features: [B, 512]
+        text_features: [num_class, 512]
         targets: [B, num_class]
         dataset_indices: [B]
         """
 
-        cosim_matrix = torch.matmul(features, label_vectors.t()) / self.temperature
+        cosim_matrix = torch.matmul(features, text_features.t()) / self.temperature
 
         # Splitting data based on dataset_indices
         cifar_indices = dataset_indices == 1
@@ -44,7 +42,7 @@ class Classify_Anything_Mixed_Loss(nn.Module):
         cifar_cosim_matrix = cosim_matrix[cifar_indices.nonzero().squeeze()]
 
         # Compute the COCO loss using asym_loss
-        coco_loss = self.asym_loss(coco_cosim_matrix, coco_targets.to("cuda")) * 3
+        coco_loss = self.asym_loss(coco_cosim_matrix, coco_targets.to("cuda"))
 
         # Convert CIFAR one-hot targets to class labels for cross_entropy
         cifar_labels = torch.argmax(cifar_targets, dim=1)

@@ -37,13 +37,6 @@ def main(cfg, local_rank):
     print("Creating model...")
     model = create_model(cfg.MODEL.NAME, cfg)
 
-    # model = resnet50(
-    #     normalize=True,
-    #     hidden_mlp=2048,
-    #     output_dim=128,
-    #     nmb_prototypes=100,
-    # )
-
     # create weights output directory
     if not os.path.exists(os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID)):
         os.makedirs(os.path.join(cfg.OUTPUT_DIR, cfg.EXP_ID))
