@@ -18,7 +18,7 @@ CUDNN:
     BENCHMARK: true
 
 MODEL:
-    INIT_WEIGHTS: true
+    INIT_WEIGHTS: false
     PRETRAINED: "/home/main/ssl-optimal-transport/runs/finetune/classify_anything_mixed_clip/model_last.pth"
     NAME: "clip"
     HEADS: ["projection", "reshape"]
@@ -53,10 +53,10 @@ TRAIN:
     LOCAL_RANK: 0
     HIDE_DATA_TIME: false
     SAVE_ALL_MODEL: false
-    RESUME: true
+    RESUME: false
     EPOCHS: 50
     NUM_ITERS: -1
-    LR: 3e-5
+    LR: 1e-4
     WD: 1e-4
     BATCH_SIZE: 64
     WARMUP_EPOCHS: 20

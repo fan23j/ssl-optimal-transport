@@ -37,8 +37,6 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
         cifar_sample_count = 0
         with torch.enable_grad() if is_train else torch.no_grad():
             self.dataset.on_epoch_start()
-            if not is_train:
-                self.ema_model.apply_shadow()
             for it, (batch_data, dataset_indices) in enumerate(data_bar):
                 data, targets = batch_data["out_1"], batch_data["target"]
 
@@ -142,6 +140,8 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
             average_loss_states[k] /= len(data_loader)
 
         average_loss_states["mAP"] = mAP * 100
+        average_loss_states["Top_1"] = top1_acc
+        average_loss_states["Top_5"] = top5_acc
         average_loss_states["metric"] = average_loss_states["mAP"]
         return average_loss_states
 
