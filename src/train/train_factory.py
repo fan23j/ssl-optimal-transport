@@ -8,6 +8,7 @@ from .tasks.classify_anything_single import ClassifyAnythingSingleTrainer
 from .tasks.swav_pretrain import SwAVPreTrainer
 from .tasks.multiclass_linear import MultiClassLinearTrainer
 from .tasks.classify_anything_mixed import ClassifyAnythingMixedTrainer
+from .tasks.classify_anything_mixed_ot import ClassifyAnythingMixedOtTrainer
 
 train_factory = {
     "simclr_pretrain": SimCLRPreTrainer,
@@ -19,4 +20,5 @@ train_factory = {
     "swav_pretrain": SwAVPreTrainer,
     "multiclass_linear": MultiClassLinearTrainer,
     "classify_anything_mixed": ClassifyAnythingMixedTrainer,
+    "classify_anything_mixed_ot": ClassifyAnythingMixedOtTrainer,
 }

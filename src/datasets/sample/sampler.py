@@ -7,7 +7,10 @@ class Sampler(ABC):
 
     def __init__(self, cfg):
         self.cfg = cfg
-        if cfg.TASK == "classify_anything_mixed":
+        if (
+            cfg.TASK == "classify_anything_mixed"
+            or cfg.TASK == "classify_anything_mixed_ot"
+        ):
             self.label_vectors = torch.load(cfg.MODEL.LABEL_VECTORS)
 
     @abstractmethod

@@ -20,7 +20,7 @@ CUDNN:
 MODEL:
     INIT_WEIGHTS: true
     PRETRAINED: "/home/main/ssl-optimal-transport/runs/pretrain/simclr_cifar10_infonce/model_last.pth"
-    NAME: "resnet50"
+    NAME: "clip"
     HEADS: ["projection", "reshape"]
     INPUT_H: 32
     INPUT_W: 32
@@ -38,6 +38,7 @@ DATASET:
     TRAIN_SET: "train"
     TEST_SET: "valid"
     NUM_CLASSES: 100
+    PAD_CIFAR: true
 
     # training data augmentation
     MEAN: [0.4914, 0.4822, 0.4465]

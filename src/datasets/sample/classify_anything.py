@@ -34,7 +34,7 @@ class ClassifyAnythingSampler(Sampler):
         ]
 
         # Initialize a tensor for one-hot vectors
-        targets = torch.zeros(len(self.label_vectors.keys()))
+        targets = torch.zeros(len(self.label_vectors))
 
         # Populate one-hot vectors using target indices
         targets[target_indices] = 1
