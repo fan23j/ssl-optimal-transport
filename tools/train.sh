@@ -6,4 +6,4 @@
 # no ema
 #CUDA_VISIBLE_DEVICES=1 python3 train.py --cfg ../experiments/finetune/classify_anything_mixed.yaml
 
-CUDA_VISIBLE_DEVICES=0 python3 train.py --cfg ../experiments/finetune/classify_anything_mixed_ot.yaml
+python train.py --cfg ../experiments/finetune/classify_anything_cifar100_single.yaml
