@@ -6,6 +6,7 @@ from .dataset.multi_crop_dataset import MultiCropDataset
 from .dataset.LT_imagenet.LT_imagenet import LT_Imagenet
 from .dataset.coco import Coco
 from .dataset.mixed_dataset import MixedDataset
+from .dataset.tiny_imagenet import TinyImageNet
 
 from .sample.mae import MaeSampler
 from .sample.simclr import SimCLRSampler
@@ -21,6 +22,7 @@ _dataset_factory = {
     "LT_IMAGENET": LT_Imagenet,
     "COCO": Coco,
     "MIXED": MixedDataset,
+    "TINY_IMAGENET": TinyImageNet,
 }
 
 _sample_factory = {

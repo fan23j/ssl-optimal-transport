@@ -35,19 +35,6 @@ class CIFAR10(CIFAR10):
             ]
         )
 
-        self.class_labels = {
-            0: "airplane",
-            1: "automobile",
-            2: "bird",
-            3: "cat",
-            4: "deer",
-            5: "dog",
-            6: "frog",
-            7: "horse",
-            8: "ship",
-            9: "truck",
-        }
-
         self.sampler = sampler
 
         self.transform = self.train_transform if train else self.test_transform

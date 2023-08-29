@@ -1,0 +1,76 @@
+DATA_DIR: "/home/main/data"
+EXP_ID: "classify_anything_tiny_imagenet_single"
+TASK: ""
+DEBUG: 0
+DEBUG_THEME: "white"
+SEED: 317
+OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/finetune"
+LOG_DIR: ""
+EXPERIMENT_NAME: ""
+GPUS: [0]
+WORKERS: 0
+PRINT_FREQ: 0
+PIN_MEMORY: true
+RANK: 0
+SAVE_RESULTS: true
+
+CUDNN:
+    BENCHMARK: true
+
+MODEL:
+    INIT_WEIGHTS: false
+    PRETRAINED: "/home/main/ssl-optimal-transport/runs/pretrain/simclr_cifar10_infonce/model_last.pth"
+    NAME: "clip"
+    HEADS: ["projection", "reshape"]
+    INPUT_H: 224
+    INPUT_W: 224
+    HEAD_INPUT_DIM: 512
+    LABEL_VECTORS: "/home/main/ssl-optimal-transport/weights/mixed_label_vectors.pt"
+    OUTPUT_FEATURES: 512
+    HIDDEN_MLP: 1048
+
+LOSS:
+    METRIC: ["classify_anything"]
+    TEMPERATURE: 0.5
+
+DATASET:
+    DATASET: "TINY_IMAGENET"
+    SAMPLE: "CLASSIFY_ANYTHING"
+    TRAIN_SET: "train"
+    TEST_SET: "valid"
+    NUM_CLASSES: 200
+    PAD_CIFAR: true
+
+    # training data augmentation
+    MEAN: [0.4914, 0.4822, 0.4465]
+    STD: [0.2023, 0.1994, 0.2010]
+    RANDOM_RESIZED_CROP: 32
+    RANDOM_HORIZONTAL_FLIP: 0.5
+    COLOR_JITTER: [0.4, 0.4, 0.4, 0.1, 0.8]
+    RANDOM_GRAYSCALE: 0.2
+    IMAGE_SIZE: 32
+
+TRAIN:
+    OPTIMIZER: "adamw"
+    DISTRIBUTE: false
+    LOCAL_RANK: 0
+    HIDE_DATA_TIME: false
+    SAVE_ALL_MODEL: false
+    RESUME: false
+    EPOCHS: 50
+    NUM_ITERS: -1
+    LR: 3e-5
+    WD: 1e-6
+    BATCH_SIZE: 64
+
+    CHECKPOINT: ""
+    SHUFFLE: true
+    VAL_INTERVALS: 1
+    TRAINVAL: false
+
+TEST:
+    BATCH_SIZE: 64
+    OUTPUT_FILE: "infonce_preds.csv"
+    TASK: "simclr_linear"
+    MODEL_PATH: "/home/main/ssl-optimal-transport/runs/finetune/simclr_cifar10_infonce/model_last.pth"
+    DROP_LAST: true
