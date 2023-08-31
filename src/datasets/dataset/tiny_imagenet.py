@@ -8,7 +8,7 @@ from randaugment import RandAugment
 
 
 class TinyImageNet(torch.utils.data.Dataset):
-    def __init__(self, cfg, root, train=True):
+    def __init__(self, cfg, root, train=True, download=False, sampler=None):
         self.root = root
         self.name = "tiny-imagenet"
         self.train = train
