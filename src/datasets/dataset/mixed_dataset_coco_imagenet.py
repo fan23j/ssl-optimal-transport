@@ -4,7 +4,8 @@ from .cifar100 import CIFAR100
 from .tiny_imagenet import TinyImageNet
 import torch
 import clip
-
+import os
+import json
 
 class MixedDatasetCocoImageNet(Dataset):
     def __init__(self, cfg, root, train=True, download=False, sampler=None):
@@ -12,7 +13,7 @@ class MixedDatasetCocoImageNet(Dataset):
             cfg, os.path.join(root,"coco"), train=train, download=download, sampler=sampler
         )
         self.imagenet_dataset = TinyImageNet(
-            cfg, os.path.join(root,"tiny-imagenet-200", train=train, download=download, sampler=sampler
+            cfg, os.path.join(root,"tiny-imagenet-200"), train=train, download=download, sampler=sampler
         )
         self.train = train
         self.coco_len = len(self.coco_dataset)
@@ -20,8 +21,9 @@ class MixedDatasetCocoImageNet(Dataset):
         self.total_len = self.coco_len + self.imagenet_len
         self.epoch_counter = 0
         self.all_unique_categories = list(
-            set(self.coco_dataset.all_categories + self.imagenet_dataset.classes)
+            set(self.coco_dataset.all_categories + self.imagenet_dataset.class_labels)
         )
+        self.mixed_labels = {category: index for index, category in enumerate(self.all_unique_categories)}
 
         descriptions = [
             "a photo that contains a " + category

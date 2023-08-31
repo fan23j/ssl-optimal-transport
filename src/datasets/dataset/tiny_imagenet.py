@@ -22,6 +22,7 @@ class TinyImageNet(torch.utils.data.Dataset):
                 line.split("\t")[0]: line.split("\t")[1].strip()
                 for line in f.readlines()
             }
+        self.class_labels = [self.class_descriptions[class_id] for class_id in self.classes if class_id in self.class_descriptions]
 
         self.class_to_idx = {cls: idx for idx, cls in enumerate(self.classes)}
 
@@ -77,6 +78,7 @@ class TinyImageNet(torch.utils.data.Dataset):
         self.text_inputs = torch.cat(
             [clip.tokenize(description) for description in descriptions]
         )
+        self.sampler = sampler
 
     def __len__(self):
         return len(self.data)
@@ -89,10 +91,13 @@ class TinyImageNet(torch.utils.data.Dataset):
             img_path = os.path.join(self.image_dir, img_name)
 
         img = Image.open(img_path).convert("RGB")
+        target = self.class_to_idx[label]
+        if self.sampler is not None:
+            return self.sampler.sample(self, img, target)
         if self.transform:
             img = self.transform(img)
 
-        return {"out_1": img, "target": self.class_to_idx[label]}
+        return {"out_1": img, "target": target}
 
 
 class OptionalPad(object):

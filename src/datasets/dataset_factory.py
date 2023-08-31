@@ -8,6 +8,7 @@ from .dataset.coco import Coco
 from .dataset.mixed_dataset import MixedDataset
 from .dataset.tiny_imagenet import TinyImageNet
 from .dataset.nuswide import NUSWIDEClassification
+from .dataset.mixed_dataset_coco_imagenet import MixedDatasetCocoImageNet
 
 from .sample.mae import MaeSampler
 from .sample.simclr import SimCLRSampler
@@ -25,6 +26,7 @@ _dataset_factory = {
     "MIXED": MixedDataset,
     "TINY_IMAGENET": TinyImageNet,
     "NUSWIDE": NUSWIDEClassification,
+    "MIXED": MixedDatasetCocoImageNet
 }
 
 _sample_factory = {

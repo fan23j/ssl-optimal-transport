@@ -27,14 +27,14 @@ class ClassifyAnythingSampler(Sampler):
         else:
             # If target is already an index, just use it directly to get the label
             target_labels = [dataset.class_labels[target]]
-
-        # Create a list of indices from target_labels based on self.label_vectors keys
+                
+        # Create a list of indices from target_labels based on self.mixed_labels keys
         target_indices = [
-            list(self.label_vectors.keys()).index(label) for label in target_labels
+            list(self.mixed_labels.keys()).index(label) for label in target_labels
         ]
 
         # Initialize a tensor for one-hot vectors
-        targets = torch.zeros(len(self.label_vectors))
+        targets = torch.zeros(len(self.mixed_labels) if self.mixed_labels else len(dataset.class_labels))
 
         # Populate one-hot vectors using target indices
         targets[target_indices] = 1

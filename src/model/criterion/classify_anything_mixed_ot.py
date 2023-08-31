@@ -4,7 +4,7 @@ import torch.nn as nn
 from .asymmetric import AsymmetricLossOptimized
 
 
-class MixedOTLoss(nn.Module):
+class Classify_Anything_Mixed_OT_Loss(nn.Module):
     def __init__(
         self,
         cfg,
@@ -14,11 +14,12 @@ class MixedOTLoss(nn.Module):
         eps=1e-8,
         disable_torch_grad_focal_loss=False,
     ):
-        super(MixedOTLoss, self).__init__()
+        super(Classify_Anything_Mixed_OT_Loss, self).__init__()
         self.temperature = cfg.LOSS.TEMPERATURE
         self.asym_loss = AsymmetricLossOptimized(
             gamma_neg, gamma_pos, clip, eps, disable_torch_grad_focal_loss
         )
+        self.loss_fn = torch.nn.BCEWithLogitsLoss()
 
     def forward(self, features, text_features, targets, dataset_indices, **kwargs):
         """
@@ -45,8 +46,9 @@ class MixedOTLoss(nn.Module):
         P = iterate_P(P0, sim_matrix, m, 5)
 
         # Compute loss
-        multiclass_loss = F.cross_entropy(P, targets.to("cuda"))
         multilabel_loss = self.asym_loss(sim_matrix, targets.to("cuda"))
+        multiclass_loss = self.loss_fn(P, targets.to("cuda"))
+
         total_loss = multiclass_loss + multilabel_loss
 
         return {

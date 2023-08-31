@@ -15,9 +15,9 @@ from ..base_trainer import BaseTrainer
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-class MixedOtTrainer(BaseTrainer):
+class ClassifyAnythingMixedOtTrainer(BaseTrainer):
     def __init__(self, cfg, model, optimizer, lr_scheduler, train_dataset, val_dataset):
-        super(MixedOtTrainer, self).__init__(
+        super(ClassifyAnythingMixedOtTrainer, self).__init__(
             cfg, model, optimizer, lr_scheduler, train_dataset, val_dataset
         )
         self.train_dataset = train_dataset
