@@ -1,23 +1,31 @@
 import os
 import numpy as np
 import torch
-from PIL import Image, ImageDraw
-from randaugment import RandAugment
 import random
 import torch.utils.data as data
+import clip
+
+from PIL import Image, ImageDraw
+from randaugment import RandAugment
 from torchvision import transforms
 
 class NUSWIDEClassification(data.Dataset):
     def __init__(self, cfg, root, train=True, download=False, sampler=None):
         self.root = root
         self.path_images = os.path.join(root, 'data/nuswide_81/images')
-
+        self.sampler = sampler
         # Read categories
         with open(os.path.join(root, 'cats.txt'), 'r') as f:
             self.all_categories = [line.strip() for line in f.readlines()]
-
+        descriptions = [
+            "a photo that contains a " + category for category in self.all_categories
+        ]
+        # Tokenize
+        self.text_inputs = torch.cat(
+            [clip.tokenize(description) for description in descriptions]
+        )
         # Read data
-        data_txt = os.path.join(root, "dataset.txt" if train else "test.txt")
+        data_txt = os.path.join(root, "database.txt" if train else "test.txt")
         self.data = []
         with open(data_txt, 'r') as f:
             for line in f.readlines():
@@ -42,9 +50,6 @@ class NUSWIDEClassification(data.Dataset):
             ]
         )
         self.transform = self.train_transform if train else self.test_transform
-
-        print('[dataset] NUSWIDE classification set=%s number of classes=%d  number of images=%d' % (
-            self.split, len(self.all_categories), len(self.data)))
 
     def __getitem__(self, index):
         path, labels = self.data[index]
