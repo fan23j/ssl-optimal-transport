@@ -4,7 +4,7 @@ import torch.nn as nn
 from .asymmetric import AsymmetricLossOptimized
 
 
-class Classify_Anything_Mixed_OT_Loss(nn.Module):
+class MixedOTLoss(nn.Module):
     def __init__(
         self,
         cfg,
@@ -14,7 +14,7 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
         eps=1e-8,
         disable_torch_grad_focal_loss=False,
     ):
-        super(Classify_Anything_Mixed_OT_Loss, self).__init__()
+        super(MixedOTLoss, self).__init__()
         self.temperature = cfg.LOSS.TEMPERATURE
         self.asym_loss = AsymmetricLossOptimized(
             gamma_neg, gamma_pos, clip, eps, disable_torch_grad_focal_loss
@@ -33,14 +33,14 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
         P0 = torch.exp(sim_matrix)
 
         # splitting data based on dataset_indices
-        cifar_indices = dataset_indices == 1
-        coco_indices = dataset_indices == 0
+        multiclass_indices = dataset_indices == 1
+        multilabel_indices = dataset_indices == 0
 
-        coco_sim_matrix = sim_matrix[coco_indices.nonzero().squeeze()]
-        cifar_sim_matrix = sim_matrix[cifar_indices.nonzero().squeeze()]
+        multilabel_sim_matrix = sim_matrix[multilabel_indices.nonzero().squeeze()]
+        multiclass_sim_matrix = sim_matrix[multiclass_indices.nonzero().squeeze()]
 
         # (number of multiclass images) * 1 + (number of multilabel images) * 0.1
-        m = (cifar_indices).sum().item() + (coco_indices).sum().item() * 0.1
+        m = (multiclass_indices).sum().item() + (multilabel_indices).sum().item() * 0.1
 
         P = iterate_P(P0, sim_matrix, m, 5)
 
@@ -50,12 +50,12 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
         total_loss = multiclass_loss + multilabel_loss
 
         return {
-            "classify_anything_loss": total_loss,
+            "mixed_ot_loss": total_loss,
             "multiclass_loss": multiclass_loss,
             "multilabel_loss": multilabel_loss,
         }, [
-            coco_sim_matrix,
-            cifar_sim_matrix,
+            multilabel_sim_matrix,
+            multiclass_sim_matrix,
         ]
 
 

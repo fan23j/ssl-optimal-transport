@@ -1,0 +1,71 @@
+DATA_DIR: "/home/main/data"
+EXP_ID: "classify_anything_mixed_clip_ot_coco_imagenet"
+TASK: "classify_anything_mixed_ot"
+DEBUG: 0
+DEBUG_THEME: "white"
+SEED: 317
+OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/finetune"
+LOG_DIR: ""
+EXPERIMENT_NAME: ""
+GPUS: [0]
+WORKERS: 0
+PRINT_FREQ: 0
+PIN_MEMORY: true
+RANK: 0
+SAVE_RESULTS: true
+
+CUDNN:
+    BENCHMARK: true
+
+MODEL:
+    INIT_WEIGHTS: false
+    PRETRAINED: "/home/main/ssl-optimal-transport/runs/finetune/classify_anything_mixed_clip/model_last.pth"
+    NAME: "clip"
+    HEADS: ["projection", "reshape"]
+    INPUT_H: 224
+    INPUT_W: 224
+    HEAD_INPUT_DIM: 512
+    LABEL_VECTORS: "/home/main/ssl-optimal-transport/weights/mixed_label_vectors.pt"
+    OUTPUT_FEATURES: 512
+    HIDDEN_MLP: 1048
+
+LOSS:
+    METRIC: ["classify_anything_mixed_ot"]
+    TEMPERATURE: 0.5
+
+DATASET:
+    DATASET: "MIXED"
+    SAMPLE: "CLASSIFY_ANYTHING"
+    TRAIN_SET: "train"
+    TEST_SET: "valid"
+    NUM_CLASSES: 168
+    IMAGE_SIZE: 224
+    TRAIN_IMAGE_DIR: "images/train"
+    VAL_IMAGE_DIR: "images/val"
+    TRAIN_ANNOTATIONS: "annotations/annotations/instances_train2017.json"
+    VAL_ANNOTATIONS: "annotations/annotations/instances_val2017.json"
+    PAD_CIFAR: true
+    RANDOM_RESIZED_CROP: 224
+
+TRAIN:
+    OPTIMIZER: "adamw"
+    DISTRIBUTE: false
+    LOCAL_RANK: 0
+    HIDE_DATA_TIME: false
+    SAVE_ALL_MODEL: false
+    RESUME: false
+    EPOCHS: 50
+    NUM_ITERS: -1
+    LR: 3e-5
+    WD: 1e-4
+    BATCH_SIZE: 64
+    WARMUP_EPOCHS: 20
+
+    CHECKPOINT: ""
+    SHUFFLE: true
+    VAL_INTERVALS: 1
+    TRAINVAL: false
+
+TEST:
+    BATCH_SIZE: 64
+    DROP_LAST: true
