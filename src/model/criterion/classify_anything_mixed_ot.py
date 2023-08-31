@@ -47,7 +47,7 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
 
         # Compute loss
         multilabel_loss = self.asym_loss(sim_matrix, targets.to("cuda"))
-        multiclass_loss = self.loss_fn(P, targets.to("cuda"))
+        multiclass_loss = F.cross_entropy(P, targets.to("cuda"))
 
         total_loss = multiclass_loss + multilabel_loss
 
