@@ -9,6 +9,8 @@ from .dataset.mixed_dataset import MixedDataset
 from .dataset.tiny_imagenet import TinyImageNet
 from .dataset.nuswide import NUSWIDEClassification
 from .dataset.mixed_dataset_coco_imagenet import MixedDatasetCocoImageNet
+from .dataset.mixed_dataset_nuswide_cifar import MixedDatasetNuswideCifar
+from .dataset.mixed_dataset_nuswide_imagenet import MixedDatasetNuswideImageNet
 
 from .sample.mae import MaeSampler
 from .sample.simclr import SimCLRSampler
@@ -26,7 +28,9 @@ _dataset_factory = {
     "MIXED": MixedDataset,
     "TINY_IMAGENET": TinyImageNet,
     "NUSWIDE": NUSWIDEClassification,
-    "MIXED": MixedDatasetCocoImageNet
+    "MIXED_COCO_IMAGENET": MixedDatasetCocoImageNet,
+    "MIXED_NUSWIDE_CIFAR": MixedDatasetNuswideCifar,
+    "MIXED_NUSWIDE_IMAGENET": MixedDatasetNuswideImageNet,
 }
 
 _sample_factory = {

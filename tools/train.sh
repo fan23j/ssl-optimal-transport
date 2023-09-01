@@ -4,6 +4,6 @@
 #CUDA_VISIBLE_DEVICES=0 python3 train.py --cfg ../experiments/pretrain/mae_cifar10_gw_supervision.yaml
 
 # no ema
-#CUDA_VISIBLE_DEVICES=1 python3 train.py --cfg ../experiments/finetune/classify_anything_mixed.yaml
+CUDA_VISIBLE_DEVICES=0 python3 train.py --cfg ../experiments/finetune/classify_anything_mixed_ot_nuswide_imagenet.yaml
 
-python train.py --cfg ../experiments/finetune/classify_anything_mixed_ot_coco_imagenet.yaml
+#python train.py --cfg ../experiments/finetune/classify_anything_mixed_ot_coco_imagenet.yaml
