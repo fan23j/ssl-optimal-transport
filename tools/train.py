@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import argparse
 import os
-import apex
+# import apex
 
 import torch
 import torch.distributed as dist
@@ -103,9 +103,9 @@ def main(cfg, local_rank):
 
     model.to("cuda")
     # init mixed precision
-    if cfg.TRAIN.USE_MIXED_PRECISION:
-        model, optimizer = apex.amp.initialize(model, optimizer, opt_level="O1")
-        print("Initializing mixed precision done.")
+    # if cfg.TRAIN.USE_MIXED_PRECISION:
+    #     model, optimizer = apex.amp.initialize(model, optimizer, opt_level="O1")
+    #     print("Initializing mixed precision done.")
 
     # set up trainer code from train_factory
     Trainer = train_factory[cfg.TASK]
