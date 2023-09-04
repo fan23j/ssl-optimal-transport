@@ -1,6 +1,7 @@
-/data/
+/data/*
 /runs/
 __pycache__/
 .ipynb_checkpoints/
 .vscode/
 /weights/
+!/data/*.txt

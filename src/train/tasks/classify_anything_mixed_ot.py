@@ -15,9 +15,9 @@ from ..base_trainer import BaseTrainer
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-class MixedOtTrainer(BaseTrainer):
+class ClassifyAnythingMixedOtTrainer(BaseTrainer):
     def __init__(self, cfg, model, optimizer, lr_scheduler, train_dataset, val_dataset):
-        super(MixedOtTrainer, self).__init__(
+        super(ClassifyAnythingMixedOtTrainer, self).__init__(
             cfg, model, optimizer, lr_scheduler, train_dataset, val_dataset
         )
         self.train_dataset = train_dataset
@@ -123,7 +123,7 @@ class MixedOtTrainer(BaseTrainer):
                 top5_acc = (total_correct_5 / multiclass_sample_count) * 100
 
                 data_bar.set_description(
-                    "{} Epoch: [{}/{}] {} Multilabel mAP: {:.2f}%, Multiclass Top-1: {:.2f}%, Top-5: {:.2f}%".format(
+                    "{} Epoch: [{}/{}] {} mAP: {:.2f}%, Top-1: {:.2f}%, Top-5: {:.2f}%".format(
                         "Train" if is_train else "Test",
                         epoch,
                         self.cfg.TRAIN.EPOCHS,

@@ -3,7 +3,5 @@
 #CUDA_VISIBLE_DEVICES=1 python3 train.py --cfg ../experiments/pretrain/simclr_cifar100_gw_supervision.yaml
 #CUDA_VISIBLE_DEVICES=0 python3 train.py --cfg ../experiments/pretrain/mae_cifar10_gw_supervision.yaml
 
-# no ema
-#CUDA_VISIBLE_DEVICES=1 python3 train.py --cfg ../experiments/finetune/classify_anything_mixed.yaml
 
 python train.py --cfg ../experiments/finetune/classify_anything_mixed_nuswide_cifar_batchwise.yaml

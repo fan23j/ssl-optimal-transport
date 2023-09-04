@@ -1,14 +1,14 @@
-DATA_DIR: "/home/ubuntu/ssl-optimal-transport/data"
-EXP_ID: "classify_anything_mixed_clip_ot_coco_imagenet"
+DATA_DIR: "/home/main/data"
+EXP_ID: "classify_anything_mixed_clip_ot_nuswide_cifar"
 TASK: "classify_anything_mixed_ot"
 DEBUG: 0
 DEBUG_THEME: "white"
 SEED: 317
-OUTPUT_DIR: "/home/ubuntu/ssl-optimal-transport/runs/finetune"
+OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/finetune"
 LOG_DIR: ""
 EXPERIMENT_NAME: ""
 GPUS: [0]
-WORKERS: 0
+WORKERS: 8
 PRINT_FREQ: 0
 PIN_MEMORY: true
 RANK: 0
@@ -25,7 +25,6 @@ MODEL:
     INPUT_H: 224
     INPUT_W: 224
     HEAD_INPUT_DIM: 512
-    LABEL_VECTORS: "/home/main/ssl-optimal-transport/weights/mixed_label_vectors.pt"
     OUTPUT_FEATURES: 512
     HIDDEN_MLP: 1048
 
@@ -34,11 +33,10 @@ LOSS:
     TEMPERATURE: 0.5
 
 DATASET:
-    DATASET: "MIXED"
+    DATASET: "MIXED_NUSWIDE_CIFAR"
     SAMPLE: "CLASSIFY_ANYTHING"
     TRAIN_SET: "train"
     TEST_SET: "valid"
-    NUM_CLASSES: 168
     IMAGE_SIZE: 224
     TRAIN_IMAGE_DIR: "images/train"
     VAL_IMAGE_DIR: "images/val"
@@ -46,7 +44,7 @@ DATASET:
     VAL_ANNOTATIONS: "annotations/instances_val2017.json"
     PAD_CIFAR: true
     RANDOM_RESIZED_CROP: 224
-    MIXED_LABELS: "/home/ubuntu/ssl-optimal-transport/data/mixed_coco_imagenet.txt"
+    MIXED_LABELS: "/home/main/ssl-optimal-transport/data/mixed_nuswide_cifar.txt"
 
 TRAIN:
     OPTIMIZER: "adamw"
