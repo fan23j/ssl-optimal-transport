@@ -9,14 +9,17 @@ from PIL import Image, ImageDraw
 from randaugment import RandAugment
 from torchvision import transforms
 
+
 class NUSWIDEClassification(data.Dataset):
     def __init__(self, cfg, root, train=True, download=False, sampler=None):
         self.root = root
-        self.path_images = os.path.join(root, 'data/nuswide_81/images')
+        self.path_images = os.path.join(root, "data/nuswide_81/images")
         self.sampler = sampler
         # Read categories
-        with open(os.path.join(root, 'cats.txt'), 'r') as f:
+        with open(os.path.join(root, "cats.txt"), "r") as f:
             self.all_categories = [line.strip() for line in f.readlines()]
+
+        self.class_labels = self.all_categories
         descriptions = [
             "a photo that contains a " + category for category in self.all_categories
         ]
@@ -27,7 +30,7 @@ class NUSWIDEClassification(data.Dataset):
         # Read data
         data_txt = os.path.join(root, "database.txt" if train else "test.txt")
         self.data = []
-        with open(data_txt, 'r') as f:
+        with open(data_txt, "r") as f:
             for line in f.readlines():
                 tokens = line.strip().split()
                 image_path = os.path.join(root, tokens[0])
@@ -53,12 +56,14 @@ class NUSWIDEClassification(data.Dataset):
 
     def __getitem__(self, index):
         path, labels = self.data[index]
-        img = Image.open(path).convert('RGB')
+        img = Image.open(path).convert("RGB")
+        target = torch.tensor(labels)
+
         if self.sampler is not None:
             return self.sampler.sample(self, img, target)
         if self.transform is not None:
             img = self.transform(img)
-        target = torch.tensor(labels)
+
         return {"out_1": img, "target": target}
 
     def __len__(self):
@@ -66,6 +71,7 @@ class NUSWIDEClassification(data.Dataset):
 
     def get_number_classes(self):
         return len(self.all_categories)
+
 
 class CutoutPIL(object):
     def __init__(self, cutout_factor=0.5):
