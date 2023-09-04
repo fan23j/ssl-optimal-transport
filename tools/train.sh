@@ -4,4 +4,4 @@
 #CUDA_VISIBLE_DEVICES=0 python3 train.py --cfg ../experiments/pretrain/mae_cifar10_gw_supervision.yaml
 
 
-python train.py --cfg ../experiments/finetune/classify_anything_mixed_nuswide_cifar_batchwise.yaml
+python train.py --cfg ../experiments/finetune/classify_anything_mixed_coco_imagenet_batchwise.yaml
