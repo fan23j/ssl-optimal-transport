@@ -32,29 +32,29 @@ class Classify_Anything_Mixed_Loss(nn.Module):
         cosim_matrix = torch.matmul(features, text_features.t()) / self.temperature
 
         # Splitting data based on dataset_indices
-        cifar_indices = dataset_indices == 1
-        coco_indices = dataset_indices == 0
+        multiclass_indices = dataset_indices == 1
+        multilabel_indices = dataset_indices == 0
 
-        coco_targets = targets[coco_indices.nonzero().squeeze().to("cpu")]
-        cifar_targets = targets[cifar_indices.nonzero().squeeze().to("cpu")]
+        multilabel_targets = targets[multilabel_indices.nonzero().squeeze().to("cpu")]
+        multiclass_targets = targets[multiclass_indices.nonzero().squeeze().to("cpu")]
 
-        coco_cosim_matrix = cosim_matrix[coco_indices.nonzero().squeeze()]
-        cifar_cosim_matrix = cosim_matrix[cifar_indices.nonzero().squeeze()]
+        multilabel_cosim_matrix = cosim_matrix[multilabel_indices.nonzero().squeeze()]
+        multiclass_cosim_matrix = cosim_matrix[multiclass_indices.nonzero().squeeze()]
 
-        # Compute the COCO loss using asym_loss
-        coco_loss = self.asym_loss(coco_cosim_matrix, coco_targets.to("cuda"))
+        # Compute the multilabel loss using asym_loss
+        multilabel_loss = self.asym_loss(multilabel_cosim_matrix, multilabel_targets.to("cuda"))
 
-        # Convert CIFAR one-hot targets to class labels for cross_entropy
-        cifar_labels = torch.argmax(cifar_targets, dim=1)
-        cifar_loss = F.cross_entropy(cifar_cosim_matrix, cifar_labels.to("cuda"))
+        # Convert multiclass one-hot targets to class labels for cross_entropy
+        multiclass_labels = torch.argmax(multiclass_targets, dim=1)
+        multiclass_loss = F.cross_entropy(multiclass_cosim_matrix, multiclass_labels.to("cuda"))
 
-        total_loss = coco_loss + cifar_loss
+        total_loss = multilabel_loss + multiclass_loss
 
         return {
             "classify_anything_loss": total_loss,
-            "coco_loss": coco_loss,
-            "cifar_loss": cifar_loss,
+            "multilabel_loss": multilabel_loss,
+            "multiclass_loss": multiclass_loss,
         }, [
-            coco_cosim_matrix,
-            cifar_cosim_matrix,
+            multilabel_cosim_matrix,
+            multiclass_cosim_matrix,
         ]

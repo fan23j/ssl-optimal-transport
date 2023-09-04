@@ -34,7 +34,7 @@ LOSS:
     TEMPERATURE: 0.5
 
 DATASET:
-    DATASET: "MIXED"
+    DATASET: "MIXED_NUSWIDE_CIFAR"
     SAMPLE: "CLASSIFY_ANYTHING"
     TRAIN_SET: "train"
     TEST_SET: "valid"
@@ -42,10 +42,11 @@ DATASET:
     IMAGE_SIZE: 224
     TRAIN_IMAGE_DIR: "images/train"
     VAL_IMAGE_DIR: "images/val"
-    TRAIN_ANNOTATIONS: "annotations/annotations/instances_train2017.json"
-    VAL_ANNOTATIONS: "annotations/annotations/instances_val2017.json"
+    TRAIN_ANNOTATIONS: "annotations/instances_train2017.json"
+    VAL_ANNOTATIONS: "annotations/instances_val2017.json"
     PAD_CIFAR: true
     RANDOM_RESIZED_CROP: 224
+    MIXED_LABELS: "/home/ubuntu/ssl-optimal-transport/data/mixed_nuswide_cifar.txt"
 
 TRAIN:
     OPTIMIZER: "adamw"
