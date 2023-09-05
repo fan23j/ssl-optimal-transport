@@ -44,21 +44,41 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
 
                 features = self.model(data)
 
-                text_features = self.model.module.backbone_model.encode_text(
-                    self.dataset.text_inputs.to("cuda")
+                # multilabel
+                multilabel_text_features = self.model.module.backbone_model.encode_text(
+                    self.dataset.multilabel_text_inputs.to("cuda")
                 )
-                text_features = text_features / text_features.norm(dim=-1, keepdim=True)
-                loss, loss_states, cosim_matrices = self.loss(
+                multilabel_text_features = (
+                    multilabel_text_features
+                    / multilabel_text_features.norm(dim=-1, keepdim=True)
+                )
+
+                # multiclass
+                multiclass_text_features = self.model.module.backbone_model.encode_text(
+                    self.dataset.multiclass_text_inputs.to("cuda")
+                )
+                multiclass_text_features = (
+                    multiclass_text_features
+                    / multiclass_text_features.norm(dim=-1, keepdim=True)
+                )
+                loss, loss_states, payload = self.loss(
                     features=features,
-                    text_features=text_features,
+                    multilabel_text_features=multilabel_text_features,
+                    multiclass_text_features=multiclass_text_features,
                     targets=targets,
                     dataset_indices=dataset_indices,
+                    dataset=self.dataset,
                 )
 
-                multilabel_cosim, multiclass_cosim = cosim_matrices
+                (
+                    multilabel_cosim,
+                    multiclass_cosim,
+                    multilabel_targets,
+                    multiclass_targets,
+                ) = payload
 
-                multilabel_targets = targets[dataset_indices == 0]
-                multiclass_targets = targets[dataset_indices == 1]
+                multilabel_targets = multilabel_targets[dataset_indices == 0]
+                multiclass_targets = multiclass_targets[dataset_indices == 1]
 
                 # Converting one-hot encoded multiclass targets to class indices
                 _, multiclass_targets_indices = multiclass_targets.max(dim=1)

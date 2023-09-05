@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 from .asymmetric import AsymmetricLossOptimized
+from .utils import convert_targets
 
 
 class Classify_Anything_Mixed_OT_Loss(nn.Module):
@@ -21,33 +22,61 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
         )
         self.loss_fn = torch.nn.BCEWithLogitsLoss()
 
-    def forward(self, features, text_features, targets, dataset_indices, **kwargs):
+    def forward(
+        self,
+        features,
+        multilabel_text_features,
+        multiclass_text_features,
+        targets,
+        dataset_indices,
+        dataset,
+        **kwargs
+    ):
         """
         features: [B, 512]
         text_features: [num_class, 512]
         targets: [B, num_class]
         dataset_indices: [B]
         """
-        sim_matrix = torch.matmul(features, text_features.t()) / self.temperature
+        multilabel_sim_matrix = (
+            torch.matmul(features, multilabel_text_features.t()) / self.temperature
+        )
+        multiclass_sim_matrix = (
+            torch.matmul(features, multiclass_text_features.t()) / self.temperature
+        )
 
         # init to numerator of softmax
-        P0 = torch.exp(sim_matrix)
+        P0 = torch.exp(multiclass_sim_matrix)
 
         # splitting data based on dataset_indices
         multiclass_indices = dataset_indices == 1
         multilabel_indices = dataset_indices == 0
 
-        multilabel_sim_matrix = sim_matrix[multilabel_indices.nonzero().squeeze()]
-        multiclass_sim_matrix = sim_matrix[multiclass_indices.nonzero().squeeze()]
+        _multilabel_sim_matrix = multilabel_sim_matrix[
+            multilabel_indices.nonzero().squeeze()
+        ]
+        _multiclass_sim_matrix = multiclass_sim_matrix[
+            multiclass_indices.nonzero().squeeze()
+        ]
 
         # (number of multiclass images) * 1 + (number of multilabel images) * 0.1
         m = (multiclass_indices).sum().item() + (multilabel_indices).sum().item() * 0.1
 
-        P = iterate_P(P0, sim_matrix, m, 5)
+        P = iterate_P(P0, multiclass_sim_matrix, m, 5)
+
+        multiclass_targets, multilabel_targets = convert_targets(
+            targets,
+            dataset.mixed_indices,
+            dataset.multilabel_labels,
+            dataset.multiclass_labels,
+            dataset_indices,
+        )
 
         # Compute loss
-        multilabel_loss = self.asym_loss(sim_matrix, targets.to("cuda"))
-        multiclass_loss = -torch.log(P).gather(1, targets.to("cuda").long().view(-1, 1)).mean()
+        multilabel_loss = self.asym_loss(
+            multilabel_sim_matrix, multilabel_targets.to("cuda")
+        )
+        multiclass_loss = self.loss_fn(P, multiclass_targets.to("cuda"))
 
         total_loss = multiclass_loss + multilabel_loss
 
@@ -56,8 +85,10 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
             "multiclass_loss": multiclass_loss,
             "multilabel_loss": multilabel_loss,
         }, [
-            multilabel_sim_matrix,
-            multiclass_sim_matrix,
+            _multilabel_sim_matrix,
+            _multiclass_sim_matrix,
+            multilabel_targets,
+            multiclass_targets,
         ]
 
 
