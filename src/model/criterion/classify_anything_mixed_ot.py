@@ -21,7 +21,7 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
         )
         self.loss_fn = torch.nn.BCEWithLogitsLoss()
 
-    def forward(self, features, text_features, targets, dataset_indices, multiclass_text_features=None, **kwargs):
+    def forward(self, features, text_features, targets, dataset_indices, **kwargs):
         """
         features: [B, 512]
         text_features: [num_class, 512]
@@ -47,7 +47,7 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
 
         # Compute loss
         multilabel_loss = self.asym_loss(sim_matrix, targets.to("cuda"))
-        multiclass_loss = F.cross_entropy(P, targets.to("cuda"))
+        multiclass_loss = -torch.log(P).gather(1, targets.to("cuda").long().view(-1, 1)).mean()
 
         total_loss = multiclass_loss + multilabel_loss
 
