@@ -58,10 +58,10 @@ class Classify_Anything_Mixed_Loss(nn.Module):
         multiclass_indices = dataset_indices == 1
         multilabel_indices = dataset_indices == 0
 
-        multilabel_targets = multiclass_targets[
+        multilabel_targets = multilabel_targets[
             multilabel_indices.nonzero().squeeze().to("cpu")
         ]
-        multiclass_targets = multilabel_targets[
+        multiclass_targets = multiclass_targets[
             multiclass_indices.nonzero().squeeze().to("cpu")
         ]
 

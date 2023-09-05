@@ -77,8 +77,8 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
                     multiclass_targets,
                 ) = payload
 
-                multilabel_targets = multilabel_targets[dataset_indices == 0]
-                multiclass_targets = multiclass_targets[dataset_indices == 1]
+                # multilabel_targets = multilabel_targets[dataset_indices == 0]
+                # multiclass_targets = multiclass_targets[dataset_indices == 1]
 
                 # Converting one-hot encoded multiclass targets to class indices
                 _, multiclass_targets_indices = multiclass_targets.max(dim=1)
