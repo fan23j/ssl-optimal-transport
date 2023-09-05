@@ -52,7 +52,7 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
         total_loss = multiclass_loss + multilabel_loss
 
         return {
-            "mixed_ot_loss": total_loss,
+            "loss": total_loss,
             "multiclass_loss": multiclass_loss,
             "multilabel_loss": multilabel_loss,
         }, [

@@ -34,7 +34,7 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
         all_preds = []
         total_correct_1 = 0
         total_correct_5 = 0
-        cifar_sample_count = 0
+        multiclass_sample_count = 0
         with torch.enable_grad() if is_train else torch.no_grad():
             self.dataset.on_epoch_start()
             for it, (batch_data, dataset_indices) in enumerate(data_bar):
@@ -55,15 +55,14 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
                     dataset_indices=dataset_indices,
                 )
 
-                coco_cosim, cifar_cosim = cosim_matrices
+                multilabel_cosim, multiclass_cosim = cosim_matrices
 
-                # Separating out COCO and CIFAR targets based on dataset_indices
-                coco_targets = targets[dataset_indices == 0]
-                cifar_targets = targets[dataset_indices == 1]
+                multilabel_targets = targets[dataset_indices == 0]
+                multiclass_targets = targets[dataset_indices == 1]
 
-                # Converting one-hot encoded CIFAR targets to class indices
-                _, cifar_targets_indices = cifar_targets.max(dim=1)
-                cifar_sample_count += len(cifar_targets_indices)
+                # Converting one-hot encoded multiclass targets to class indices
+                _, multiclass_targets_indices = multiclass_targets.max(dim=1)
+                multiclass_sample_count += len(multiclass_targets_indices)
                 if is_train:
                     self.optimizer.zero_grad()
                     loss.backward()
@@ -80,10 +79,10 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
                     f"{k}: {v:.4f}" for k, v in loss_states.items()
                 )
 
-                # COCO: mAP calculation using separated targets and predictions
-                coco_preds = torch.sigmoid(coco_cosim)
-                all_preds.append(coco_preds.cpu())
-                all_targets.append(coco_targets.cpu())
+                # multilabel: mAP calculation using separated targets and predictions
+                multilabel_preds = torch.sigmoid(multilabel_cosim)
+                all_preds.append(multilabel_preds.cpu())
+                all_targets.append(multilabel_targets.cpu())
 
                 # calculate mAP for current collected predictions and targets
                 cur_preds = torch.cat(all_preds, dim=0)
@@ -103,27 +102,27 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
                         pass  # Ignore this specific warning
                 mAP = np.mean(average_precisions)
 
-                # CIFAR: Top-k accuracy calculation
-                cifar_cosim_softmax = F.softmax(cifar_cosim, dim=1)
+                # multiclass: Top-k accuracy calculation
+                multiclass_cosim_softmax = F.softmax(multiclass_cosim, dim=1)
                 prediction = torch.argsort(
-                    cifar_cosim_softmax, dim=-1, descending=True
+                    multiclass_cosim_softmax, dim=-1, descending=True
                 ).cpu()
                 total_correct_1 += torch.sum(
-                    (prediction[:, 0:1] == cifar_targets_indices.unsqueeze(dim=-1))
+                    (prediction[:, 0:1] == multiclass_targets_indices.unsqueeze(dim=-1))
                     .any(dim=-1)
                     .float()
                 ).item()
                 total_correct_5 += torch.sum(
-                    (prediction[:, 0:5] == cifar_targets_indices.unsqueeze(dim=-1))
+                    (prediction[:, 0:5] == multiclass_targets_indices.unsqueeze(dim=-1))
                     .any(dim=-1)
                     .float()
                 ).item()
 
-                top1_acc = (total_correct_1 / cifar_sample_count) * 100
-                top5_acc = (total_correct_5 / cifar_sample_count) * 100
+                top1_acc = (total_correct_1 / multiclass_sample_count) * 100
+                top5_acc = (total_correct_5 / multiclass_sample_count) * 100
 
                 data_bar.set_description(
-                    "{} Epoch: [{}/{}] {} COCO mAP: {:.2f}%, CIFAR Top-1: {:.2f}%, Top-5: {:.2f}%".format(
+                    "{} Epoch: [{}/{}] {} mAP: {:.2f}%, Top-1: {:.2f}%, Top-5: {:.2f}%".format(
                         "Train" if is_train else "Test",
                         epoch,
                         self.cfg.TRAIN.EPOCHS,

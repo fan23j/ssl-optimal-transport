@@ -2,7 +2,7 @@ import torch
 import math
 import numpy as np
 
-from apex.parallel.LARC import LARC
+# from apex.parallel.LARC import LARC
 
 
 class OptimizerSchedulerFactory:
@@ -38,47 +38,47 @@ class OptimizerSchedulerFactory:
                 weight_decay=self.cfg.TRAIN.WD,
             )
             lr_func = lambda epoch: 1
-        elif self.cfg.TRAIN.OPTIMIZER == "larc":
-            optimizer = torch.optim.SGD(
-                self.model.parameters(),
-                lr=self.cfg.TRAIN.LR,
-                momentum=self.cfg.TRAIN.MOMENTUM,
-                weight_decay=self.cfg.TRAIN.WD,
-            )
-            optimizer = LARC(optimizer=optimizer, trust_coefficient=0.001, clip=False)
+#         elif self.cfg.TRAIN.OPTIMIZER == "larc":
+#             optimizer = torch.optim.SGD(
+#                 self.model.parameters(),
+#                 lr=self.cfg.TRAIN.LR,
+#                 momentum=self.cfg.TRAIN.MOMENTUM,
+#                 weight_decay=self.cfg.TRAIN.WD,
+#             )
+#             optimizer = LARC(optimizer=optimizer, trust_coefficient=0.001, clip=False)
 
-            # Create the learning rate schedules for warmup and cosine annealing
-            warmup_lr_schedule = np.linspace(
-                self.cfg.TRAIN.START_WARMUP,
-                self.cfg.TRAIN.LR,
-                len(self.train_loader) * self.cfg.TRAIN.WARMUP_EPOCHS,
-            )
-            iters = np.arange(
-                len(self.train_loader)
-                * (self.cfg.TRAIN.EPOCHS - self.cfg.TRAIN.WARMUP_EPOCHS)
-            )
-            cosine_lr_schedule = np.array(
-                [
-                    self.cfg.TRAIN.FINAL_LR
-                    + 0.5
-                    * (self.cfg.TRAIN_LR - self.cfg.TRAIN.FINAL_LR)
-                    * (
-                        1
-                        + math.cos(
-                            math.pi
-                            * t
-                            / (
-                                len(self.train_loader)
-                                * (self.cfg.TRAIN.EPOCHS - self.cfg.TRAIN.WARMUP_EPOCHS)
-                            )
-                        )
-                    )
-                    for t in iters
-                ]
-            )
-            lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
+#             # Create the learning rate schedules for warmup and cosine annealing
+#             warmup_lr_schedule = np.linspace(
+#                 self.cfg.TRAIN.START_WARMUP,
+#                 self.cfg.TRAIN.LR,
+#                 len(self.train_loader) * self.cfg.TRAIN.WARMUP_EPOCHS,
+#             )
+#             iters = np.arange(
+#                 len(self.train_loader)
+#                 * (self.cfg.TRAIN.EPOCHS - self.cfg.TRAIN.WARMUP_EPOCHS)
+#             )
+#             cosine_lr_schedule = np.array(
+#                 [
+#                     self.cfg.TRAIN.FINAL_LR
+#                     + 0.5
+#                     * (self.cfg.TRAIN_LR - self.cfg.TRAIN.FINAL_LR)
+#                     * (
+#                         1
+#                         + math.cos(
+#                             math.pi
+#                             * t
+#                             / (
+#                                 len(self.train_loader)
+#                                 * (self.cfg.TRAIN.EPOCHS - self.cfg.TRAIN.WARMUP_EPOCHS)
+#                             )
+#                         )
+#                     )
+#                     for t in iters
+#                 ]
+#             )
+#             lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
 
-            lr_func = lambda epoch: lr_schedule[epoch]
+#             lr_func = lambda epoch: lr_schedule[epoch]
         else:
             raise NotImplementedError("Optimizer not supported")
 
