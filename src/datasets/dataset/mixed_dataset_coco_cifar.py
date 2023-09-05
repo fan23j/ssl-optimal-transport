@@ -3,12 +3,17 @@ from .coco import Coco
 from .cifar100 import CIFAR100
 import torch
 import clip
+import os
 
 
-class MixedDataset(Dataset):
+class MixedDatasetCocoCifar(Dataset):
     def __init__(self, cfg, root, train=True, download=False, sampler=None):
         self.coco_dataset = Coco(
-            cfg, root, train=train, download=download, sampler=sampler
+            cfg,
+            os.path.join(root, "coco"),
+            train=train,
+            download=download,
+            sampler=sampler,
         )
         self.cifar_dataset = CIFAR100(
             cfg, root, train=train, download=download, sampler=sampler
@@ -24,19 +29,40 @@ class MixedDataset(Dataset):
         self.mixed_labels = {
             category: index for index, category in enumerate(self.all_unique_categories)
         }
-        
+
+        self.mixed_indices = {
+            index: category for index, category in enumerate(self.all_unique_categories)
+        }
+
+        self.multilabel_labels = {
+            category: index
+            for index, category in enumerate(self.coco_dataset.all_categories)
+        }
+
+        self.multilabel_indices = {
+            index: category
+            for index, category in enumerate(self.coco_dataset.all_categories)
+        }
+
+        self.multiclass_labels = {
+            category: index for index, category in enumerate(self.cifar_dataset.classes)
+        }
+
+        self.multiclass_indices = {
+            index: category for index, category in enumerate(self.cifar_dataset.classes)
+        }
+
         multilabel_descriptions = [
             "a photo that contains a " + category
-            for category in self.all_unique_categories
+            for category in self.coco_dataset.all_categories
         ]
 
         multiclass_descriptions = [
-            "a photo of a " + category
-            for category in self.all_unique_categories
+            "a photo of a " + category for category in self.cifar_dataset.classes
         ]
 
         # Tokenize
-        self.text_inputs = torch.cat(
+        self.multilabel_text_inputs = torch.cat(
             [clip.tokenize(description) for description in multilabel_descriptions]
         )
 

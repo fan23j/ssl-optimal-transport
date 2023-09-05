@@ -1,10 +1,10 @@
-DATA_DIR: "/home/ubuntu/ssl/ssl-optimal-transport/data"
+DATA_DIR: "/home/main/data"
 EXP_ID: "classify_anything_mixed_clip_ot_coco_imagenet"
 TASK: "classify_anything_mixed_ot"
 DEBUG: 0
 DEBUG_THEME: "white"
 SEED: 317
-OUTPUT_DIR: "/home/ubuntu/ssl/ssl-optimal-transport/runs/finetune"
+OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/finetune"
 LOG_DIR: ""
 EXPERIMENT_NAME: ""
 GPUS: [0]
@@ -34,7 +34,7 @@ LOSS:
     TEMPERATURE: 0.5
 
 DATASET:
-    DATASET: "MIXED"
+    DATASET: "MIXED_COCO_IMAGENET"
     SAMPLE: "CLASSIFY_ANYTHING"
     TRAIN_SET: "train"
     TEST_SET: "valid"
@@ -42,8 +42,8 @@ DATASET:
     IMAGE_SIZE: 224
     TRAIN_IMAGE_DIR: "images/train"
     VAL_IMAGE_DIR: "images/val"
-    TRAIN_ANNOTATIONS: "annotations/instances_train2017.json"
-    VAL_ANNOTATIONS: "annotations/instances_val2017.json"
+    TRAIN_ANNOTATIONS: "annotations/annotations/instances_train2017.json"
+    VAL_ANNOTATIONS: "annotations/annotations/instances_val2017.json"
     PAD_CIFAR: true
     RANDOM_RESIZED_CROP: 224
     MIXED_LABELS: "/home/ubuntu/ssl/ssl-optimal-transport/data/mixed_coco_imagenet.txt"
@@ -59,7 +59,7 @@ TRAIN:
     NUM_ITERS: -1
     LR: 3e-5
     WD: 1e-4
-    BATCH_SIZE: 64
+    BATCH_SIZE: 32
     WARMUP_EPOCHS: 20
 
     CHECKPOINT: ""
@@ -68,5 +68,5 @@ TRAIN:
     TRAINVAL: false
 
 TEST:
-    BATCH_SIZE: 64
+    BATCH_SIZE: 32
     DROP_LAST: true

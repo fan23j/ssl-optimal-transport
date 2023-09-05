@@ -5,7 +5,7 @@ from .dataset.LT_cifar100 import LongTailCIFAR100
 from .dataset.multi_crop_dataset import MultiCropDataset
 from .dataset.LT_imagenet.LT_imagenet import LT_Imagenet
 from .dataset.coco import Coco
-from .dataset.mixed_dataset import MixedDataset
+from .dataset.mixed_dataset_coco_cifar import MixedDatasetCocoCifar
 from .dataset.tiny_imagenet import TinyImageNet
 from .dataset.nuswide import NUSWIDEClassification
 from .dataset.mixed_dataset_coco_imagenet import MixedDatasetCocoImageNet
@@ -25,7 +25,7 @@ _dataset_factory = {
     "MULTICROP": MultiCropDataset,
     "LT_IMAGENET": LT_Imagenet,
     "COCO": Coco,
-    "MIXED": MixedDataset,
+    "MIXED_COCO_CIFAR": MixedDatasetCocoCifar,
     "TINY_IMAGENET": TinyImageNet,
     "NUSWIDE": NUSWIDEClassification,
     "MIXED_COCO_IMAGENET": MixedDatasetCocoImageNet,

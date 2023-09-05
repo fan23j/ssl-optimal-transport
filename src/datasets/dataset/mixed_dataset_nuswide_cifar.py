@@ -34,14 +34,44 @@ class MixedDatasetNuswideCifar(Dataset):
             category: index for index, category in enumerate(self.all_unique_categories)
         }
 
-        descriptions = [
+        self.mixed_indices = {
+            index: category for index, category in enumerate(self.all_unique_categories)
+        }
+
+        self.multilabel_labels = {
+            category: index
+            for index, category in enumerate(self.nuswide_dataset.all_categories)
+        }
+
+        self.multilabel_indices = {
+            index: category
+            for index, category in enumerate(self.nuswide_dataset.all_categories)
+        }
+
+        self.multiclass_labels = {
+            category: index for index, category in enumerate(self.cifar_dataset.classes)
+        }
+
+        self.multiclass_indices = {
+            index: category for index, category in enumerate(self.cifar_dataset.classes)
+        }
+
+        multilabel_descriptions = [
             "a photo that contains a " + category
-            for category in self.all_unique_categories
+            for category in self.nuswide_dataset.all_categories
+        ]
+
+        multiclass_descriptions = [
+            "a photo of a " + category for category in self.cifar_dataset.classes
         ]
 
         # Tokenize
-        self.text_inputs = torch.cat(
-            [clip.tokenize(description) for description in descriptions]
+        self.multilabel_text_inputs = torch.cat(
+            [clip.tokenize(description) for description in multilabel_descriptions]
+        )
+
+        self.multiclass_text_inputs = torch.cat(
+            [clip.tokenize(description) for description in multiclass_descriptions]
         )
 
     def on_epoch_start(self):
