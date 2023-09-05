@@ -8,7 +8,7 @@ OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/finetune"
 LOG_DIR: ""
 EXPERIMENT_NAME: ""
 GPUS: [0]
-WORKERS: 8
+WORKERS: 0
 PRINT_FREQ: 0
 PIN_MEMORY: true
 RANK: 0

@@ -44,13 +44,29 @@ class ClassifyAnythingMixedOtTrainer(BaseTrainer):
 
                 features = self.model(data)
 
+                # multilabel
                 text_features = self.model.module.backbone_model.encode_text(
                     self.dataset.text_inputs.to("cuda")
                 )
                 text_features = text_features / text_features.norm(dim=-1, keepdim=True)
+
+                multiclass_text_features = None
+                if self.cfg.TRAIN.USE_MIXED_LABELS:
+                    # multiclass
+                    multiclass_text_features = (
+                        self.model.module.backbone_model.encode_text(
+                            self.dataset.multiclass_text_inputs.to("cuda")
+                        )
+                    )
+                    multiclass_text_features = (
+                        multiclass_text_features
+                        / multiclass_text_features.norm(dim=-1, keepdim=True)
+                    )
+
                 loss, loss_states, cosim_matrices = self.loss(
                     features=features,
                     text_features=text_features,
+                    multiclass_text_features=multiclass_text_features,
                     targets=targets,
                     dataset_indices=dataset_indices,
                 )

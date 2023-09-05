@@ -21,15 +21,27 @@ class MixedDataset(Dataset):
         self.all_unique_categories = list(
             set(self.coco_dataset.all_categories + self.cifar_dataset.classes)
         )
-
-        descriptions = [
+        self.mixed_labels = {
+            category: index for index, category in enumerate(self.all_unique_categories)
+        }
+        
+        multilabel_descriptions = [
             "a photo that contains a " + category
+            for category in self.all_unique_categories
+        ]
+
+        multiclass_descriptions = [
+            "a photo of a " + category
             for category in self.all_unique_categories
         ]
 
         # Tokenize
         self.text_inputs = torch.cat(
-            [clip.tokenize(description) for description in descriptions]
+            [clip.tokenize(description) for description in multilabel_descriptions]
+        )
+
+        self.multiclass_text_inputs = torch.cat(
+            [clip.tokenize(description) for description in multiclass_descriptions]
         )
 
     def on_epoch_start(self):

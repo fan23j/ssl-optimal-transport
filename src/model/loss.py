@@ -10,6 +10,7 @@ from .criterion.classify_anything import Classify_Anything_Loss
 from .criterion.classify_anything_multilabel import Classify_Anything_MultiLabel_Loss
 from .criterion.classify_anything_mixed import Classify_Anything_Mixed_Loss
 from .criterion.classify_anything_mixed_ot import Classify_Anything_Mixed_OT_Loss
+from .criterion.classify_anything_mixed_ot_text import Classify_Anything_Mixed_OT_Text_Loss
 from .criterion.bce import BCE_Loss
 
 _loss_factory = {
@@ -23,6 +24,7 @@ _loss_factory = {
     "classify_anything_multi": Classify_Anything_MultiLabel_Loss,
     "classify_anything_mixed": Classify_Anything_Mixed_Loss,
     "classify_anything_mixed_ot": Classify_Anything_Mixed_OT_Loss,
+    "classify_anything_mixed_ot_text": Classify_Anything_Mixed_OT_Text_Loss,
     "bce": BCE_Loss,
 }
 

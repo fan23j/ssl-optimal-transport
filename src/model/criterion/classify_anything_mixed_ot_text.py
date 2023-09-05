@@ -4,7 +4,7 @@ import torch.nn as nn
 from .asymmetric import AsymmetricLossOptimized
 
 
-class Classify_Anything_Mixed_OT_Loss(nn.Module):
+class Classify_Anything_Mixed_OT_Text_Loss(nn.Module):
     def __init__(
         self,
         cfg,
@@ -14,39 +14,40 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
         eps=1e-8,
         disable_torch_grad_focal_loss=False,
     ):
-        super(Classify_Anything_Mixed_OT_Loss, self).__init__()
+        super(Classify_Anything_Mixed_OT_Text_Loss, self).__init__()
         self.temperature = cfg.LOSS.TEMPERATURE
         self.asym_loss = AsymmetricLossOptimized(
             gamma_neg, gamma_pos, clip, eps, disable_torch_grad_focal_loss
         )
         self.loss_fn = torch.nn.BCEWithLogitsLoss()
 
-    def forward(self, features, text_features, targets, dataset_indices, multiclass_text_features=None, **kwargs):
+    def forward(self, features, text_features, targets, dataset_indices, multiclass_text_features, **kwargs):
         """
         features: [B, 512]
         text_features: [num_class, 512]
         targets: [B, num_class]
         dataset_indices: [B]
         """
-        sim_matrix = torch.matmul(features, text_features.t()) / self.temperature
+        multilabel_sim_matrix = torch.matmul(features, text_features.t()) / self.temperature
+        multiclass_sim_matrix = torch.matmul(features, multiclass_text_features.t()) / self.temperature
 
         # init to numerator of softmax
-        P0 = torch.exp(sim_matrix)
+        P0 = torch.exp(multiclass_sim_matrix)
 
         # splitting data based on dataset_indices
         multiclass_indices = dataset_indices == 1
         multilabel_indices = dataset_indices == 0
 
-        multilabel_sim_matrix = sim_matrix[multilabel_indices.nonzero().squeeze()]
-        multiclass_sim_matrix = sim_matrix[multiclass_indices.nonzero().squeeze()]
+        _multilabel_sim_matrix = multilabel_sim_matrix[multilabel_indices.nonzero().squeeze()]
+        _multiclass_sim_matrix = multiclass_sim_matrix[multiclass_indices.nonzero().squeeze()]
 
         # (number of multiclass images) * 1 + (number of multilabel images) * 0.1
         m = (multiclass_indices).sum().item() + (multilabel_indices).sum().item() * 0.1
 
-        P = iterate_P(P0, sim_matrix, m, 5)
+        P = iterate_P(P0, multiclass_sim_matrix, m, 5)
 
         # Compute loss
-        multilabel_loss = self.asym_loss(sim_matrix, targets.to("cuda"))
+        multilabel_loss = self.asym_loss(multilabel_sim_matrix, targets.to("cuda"))
         multiclass_loss = F.cross_entropy(P, targets.to("cuda"))
 
         total_loss = multiclass_loss + multilabel_loss
@@ -56,8 +57,8 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
             "multiclass_loss": multiclass_loss,
             "multilabel_loss": multilabel_loss,
         }, [
-            multilabel_sim_matrix,
-            multiclass_sim_matrix,
+            _multilabel_sim_matrix,
+            _multiclass_sim_matrix,
         ]
 
 

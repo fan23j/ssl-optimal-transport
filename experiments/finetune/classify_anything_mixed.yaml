@@ -25,7 +25,6 @@ MODEL:
     INPUT_H: 224
     INPUT_W: 224
     HEAD_INPUT_DIM: 512
-    LABEL_VECTORS: "/home/main/ssl-optimal-transport/weights/mixed_label_vectors.pt"
     OUTPUT_FEATURES: 512
     HIDDEN_MLP: 1048
 
