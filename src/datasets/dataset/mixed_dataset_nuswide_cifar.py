@@ -27,16 +27,10 @@ class MixedDatasetNuswideCifar(Dataset):
         self.cifar_len = len(self.cifar_dataset)
         self.total_len = self.nuswide_len + self.cifar_len
         self.epoch_counter = 0
-        self.all_unique_categories = list(
-            set(self.nuswide_dataset.all_categories + self.cifar_dataset.class_labels)
-        )
-        self.mixed_labels = {
-            category: index for index, category in enumerate(self.all_unique_categories)
-        }
+        with open(cfg.DATASET.MIXED_LABELS, 'r') as file:
+            self.mixed_labels = json.load(file)
 
-        self.mixed_indices = {
-            index: category for index, category in enumerate(self.all_unique_categories)
-        }
+        self.mixed_indices = {value: key for key, value in self.mixed_labels.items()}
 
         self.multilabel_labels = {
             category: index
