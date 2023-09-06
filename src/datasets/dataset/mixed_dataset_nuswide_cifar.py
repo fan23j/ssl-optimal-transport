@@ -4,6 +4,7 @@ from .nuswide import NUSWIDEClassification
 import torch
 import clip
 import os
+import json
 
 
 class MixedDatasetNuswideCifar(Dataset):

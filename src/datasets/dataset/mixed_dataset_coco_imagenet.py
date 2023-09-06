@@ -5,6 +5,7 @@ from .tiny_imagenet import TinyImageNet
 import torch
 import clip
 import os
+import json
 
 
 class MixedDatasetCocoImageNet(Dataset):
