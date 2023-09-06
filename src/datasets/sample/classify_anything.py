@@ -27,7 +27,7 @@ class ClassifyAnythingSampler(Sampler):
         else:
             # If target is already an index, just use it directly to get the label
             target_labels = [dataset.class_labels[target]]
-                
+
         # Create a list of indices from target_labels based on self.mixed_labels keys
         target_indices = [
             list(self.mixed_labels.keys()).index(label) for label in target_labels
