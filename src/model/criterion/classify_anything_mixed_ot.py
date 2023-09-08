@@ -20,7 +20,6 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
         self.asym_loss = AsymmetricLossOptimized(
             gamma_neg, gamma_pos, clip, eps, disable_torch_grad_focal_loss
         )
-        self.loss_fn = torch.nn.BCEWithLogitsLoss()
 
     def forward(
         self,
@@ -76,7 +75,7 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
         multilabel_loss = self.asym_loss(
             multilabel_sim_matrix, multilabel_targets.to("cuda")
         )
-        multiclass_loss = self.loss_fn(P, multiclass_targets.to("cuda"))
+        multiclass_loss = -torch.sum(multiclass_targets.to("cuda") * torch.log(P))
 
         total_loss = multiclass_loss + multilabel_loss
 

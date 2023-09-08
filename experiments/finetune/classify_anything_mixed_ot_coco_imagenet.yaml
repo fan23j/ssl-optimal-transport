@@ -46,7 +46,7 @@ DATASET:
     VAL_ANNOTATIONS: "annotations/annotations/instances_val2017.json"
     PAD_CIFAR: true
     RANDOM_RESIZED_CROP: 224
-    MIXED_LABELS: "/home/ubuntu/ssl/ssl-optimal-transport/data/mixed_coco_imagenet.txt"
+    MIXED_LABELS: "/home/main/ssl-optimal-transport/data/mixed_coco_imagenet.txt"
 
 TRAIN:
     OPTIMIZER: "adamw"
