@@ -44,9 +44,6 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
             torch.matmul(features, multiclass_text_features.t()) / self.temperature
         )
 
-        # init to numerator of softmax
-        P0 = torch.exp(multiclass_sim_matrix)
-
         # splitting data based on dataset_indices
         multiclass_indices = dataset_indices == 1
         multilabel_indices = dataset_indices == 0
@@ -61,7 +58,7 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
         # (number of multiclass images) * 1 + (number of multilabel images) * 0.1
         m = (multiclass_indices).sum().item() + (multilabel_indices).sum().item() * 0.1
 
-        P = iterate_P(P0, multiclass_sim_matrix, m, 4)
+        P = iterate_P(multiclass_sim_matrix, m, 5)
 
         multiclass_targets, multilabel_targets = convert_targets(
             targets,
@@ -92,12 +89,13 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
         ]
 
 
-def iterate_P(P, sim_matrix, m, num_iterations=5):
+def iterate_P(sim_matrix, m, num_iterations=5):
+    P = torch.exp(sim_matrix)
     for _ in range(num_iterations):
         # C1
         column_sums_P = P.sum(dim=0)  # [num_class]
         scaling_factors = torch.min(
-            sim_matrix / column_sums_P, torch.tensor(1.0).to(sim_matrix.device)
+            P / column_sums_P, torch.tensor(1.0).to(P.device)
         )  # [batch_size, num_class]
         D = torch.diag(scaling_factors).unsqueeze(1)  # [batch_size, 1]
         P = P * D
