@@ -61,7 +61,7 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
         # (number of multiclass images) * 1 + (number of multilabel images) * 0.1
         m = (multiclass_indices).sum().item() + (multilabel_indices).sum().item() * 0.1
 
-        P = iterate_P(P0, multiclass_sim_matrix, m, 5)
+        P = iterate_P(P0, multiclass_sim_matrix, m, 4)
 
         multiclass_targets, multilabel_targets = convert_targets(
             targets,
@@ -75,6 +75,7 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
         multilabel_loss = self.asym_loss(
             multilabel_sim_matrix, multilabel_targets.to("cuda")
         )
+
         multiclass_loss = -torch.sum(multiclass_targets.to("cuda") * torch.log(P))
 
         total_loss = multiclass_loss + multilabel_loss
