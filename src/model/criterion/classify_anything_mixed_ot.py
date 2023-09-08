@@ -89,19 +89,37 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
         ]
 
 
+# def iterate_P(sim_matrix, m, num_iterations=5):
+#     P = torch.exp(sim_matrix)
+
+#     for _ in range(num_iterations):
+#         # C1
+#         row_sums_P = P.sum(dim=1)
+#         scaling_factors = torch.min(
+#             torch.ones_like(row_sums_P) / row_sums_P,
+#             torch.tensor(1.0).to(P.device),
+#         )
+#         D = torch.diag(scaling_factors)
+#         P = torch.matmul(D, P)
+
+#         # C2
+#         total_sum = P.sum()
+#         scaling_factor = m / total_sum
+#         P = P * scaling_factor
+#     return P
+
+
 def iterate_P(sim_matrix, m, num_iterations=5):
     P = torch.exp(sim_matrix)
+
     for _ in range(num_iterations):
         # C1
-        column_sums_P = P.sum(dim=0)  # [num_class]
-        scaling_factors = torch.min(
-            P / column_sums_P, torch.tensor(1.0).to(P.device)
-        )  # [batch_size, num_class]
-        D = torch.diag(scaling_factors).unsqueeze(1)  # [batch_size, 1]
-        P = P * D
+        row_sums_P = P.sum(dim=1)
+        scaling_factors = torch.max(
+            row_sums_P,
+            torch.tensor(1.0).to(P.device),
+        )
+        P = torch.div(P, scaling_factors.unsqueeze(1))
 
-        # C2
-        total_sum = P.sum()
-        scaling_factor = m / total_sum
-        P = P * scaling_factor
+        P = P * m / P.sum()
     return P
