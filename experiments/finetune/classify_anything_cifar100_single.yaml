@@ -25,7 +25,6 @@ MODEL:
     INPUT_H: 224
     INPUT_W: 224
     HEAD_INPUT_DIM: 512
-    LABEL_VECTORS: "/home/main/ssl-optimal-transport/weights/mixed_label_vectors.pt"
     OUTPUT_FEATURES: 512
     HIDDEN_MLP: 1048
 
@@ -61,7 +60,7 @@ TRAIN:
     NUM_ITERS: -1
     LR: 3e-5
     WD: 1e-6
-    BATCH_SIZE: 64
+    BATCH_SIZE: 32
 
     CHECKPOINT: ""
     SHUFFLE: true
@@ -69,7 +68,7 @@ TRAIN:
     TRAINVAL: false
 
 TEST:
-    BATCH_SIZE: 64
+    BATCH_SIZE: 32
     OUTPUT_FILE: "infonce_preds.csv"
     TASK: "simclr_linear"
     MODEL_PATH: "/home/main/ssl-optimal-transport/runs/finetune/simclr_cifar10_infonce/model_last.pth"

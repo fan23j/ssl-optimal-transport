@@ -44,12 +44,18 @@ class CIFAR100(CIFAR100):
                 transforms.Normalize(cfg.DATASET.MEAN, cfg.DATASET.STD),
             ]
         )
-        descriptions = [
+        multilabel_descriptions = [
             "a photo that contains a " + category for category in self.classes
         ]
+        multiclass_descriptions = [
+            "a photo of a " + category for category in self.classes
+        ]
         # Tokenize
-        self.text_inputs = torch.cat(
-            [clip.tokenize(description) for description in descriptions]
+        self.multiclass_text_inputs = torch.cat(
+            [clip.tokenize(description) for description in multiclass_descriptions]
+        )
+        self.multilabel_text_inputs = torch.cat(
+            [clip.tokenize(description) for description in multilabel_descriptions]
         )
 
         self.transform = self.train_transform if train else self.test_transform

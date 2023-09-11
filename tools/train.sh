@@ -1,2 +1,1 @@
-CUDA_VISIBLE_DEVICES=1 python3 train.py --cfg ../experiments/finetune/classify_anything_mixed_ot_nuswide_cifar.yaml
-#CUDA_VISIBLE_DEVICES=1 python3 train.py --cfg ../experiments/finetune/classify_anything_mixed_ot_coco_imagenet.yaml
+python train.py --cfg ../experiments/finetune/classify_anything_cifar100_single.yaml

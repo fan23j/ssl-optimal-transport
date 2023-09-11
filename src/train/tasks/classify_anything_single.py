@@ -37,7 +37,7 @@ class ClassifyAnythingSingleTrainer(BaseTrainer):
                 features = self.model(data)
 
                 text_features = self.model.module.backbone_model.encode_text(
-                    self.dataset.text_inputs.to("cuda")
+                    self.dataset.multiclass_text_inputs.to("cuda")
                 )
                 text_features = text_features / text_features.norm(dim=-1, keepdim=True)
 
