@@ -52,7 +52,7 @@ TRAIN:
     NUM_ITERS: -1
     LR: 3e-5
     WD: 1e-4
-    BATCH_SIZE: 64
+    BATCH_SIZE: 32
     WARMUP_EPOCHS: 20
 
     CHECKPOINT: ""
@@ -61,5 +61,5 @@ TRAIN:
     TRAINVAL: false
 
 TEST:
-    BATCH_SIZE: 64
+    BATCH_SIZE: 32
     DROP_LAST: true

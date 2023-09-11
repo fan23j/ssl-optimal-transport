@@ -45,12 +45,18 @@ class Coco(datasets.coco.CocoDetection):
         self.all_categories = [
             cat["name"] for cat in self.coco.loadCats(self.coco.getCatIds())
         ]
-        descriptions = [
+        multilabel_descriptions = [
             "a photo that contains a " + category for category in self.all_categories
         ]
+        multiclass_descriptions = [
+            "a photo of a " + category for category in self.all_categories
+        ]
         # Tokenize
-        self.text_inputs = torch.cat(
-            [clip.tokenize(description) for description in descriptions]
+        self.multlabel_text_inputs = torch.cat(
+            [clip.tokenize(description) for description in multilabel_descriptions]
+        )
+        self.multiclass_text_inputs = torch.cat(
+            [clip.tokenize(description) for description in multiclass_descriptions]
         )
         self.sampler = sampler
         self.class_labels = [

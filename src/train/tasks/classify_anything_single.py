@@ -14,6 +14,7 @@ class ClassifyAnythingSingleTrainer(BaseTrainer):
         self.train_dataset = train_dataset
         self.val_dataset = val_dataset
         self.dataset = train_dataset
+        self.cfg = cfg
 
     def train(self, epoch, data_loader, is_train=True):
         self.model.train() if is_train else self.model.eval()
@@ -36,9 +37,14 @@ class ClassifyAnythingSingleTrainer(BaseTrainer):
                 )
                 features = self.model(data)
 
-                text_features = self.model.module.backbone_model.encode_text(
-                    self.dataset.multiclass_text_inputs.to("cuda")
-                )
+                if self.cfg.TRAIN.USE_MULTICLASS:
+                    text_features = self.model.module.backbone_model.encode_text(
+                        self.dataset.multiclass_text_inputs.to("cuda")
+                    )
+                else:
+                    text_features = self.model.module.backbone_model.encode_text(
+                        self.dataset.multlabel_text_inputs.to("cuda")
+                    )
                 text_features = text_features / text_features.norm(dim=-1, keepdim=True)
 
                 loss, loss_states, cosim_softmax = self.loss(
