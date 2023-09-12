@@ -1,5 +1,5 @@
 DATA_DIR: "/home/ubuntu/ssl-optimal-transport/data"
-EXP_ID: "classify_anything_cifar100_single"
+EXP_ID: "classify_anything_cifar100_single_contains"
 TASK: "classify_anything_single"
 DEBUG: 0
 DEBUG_THEME: "white"
@@ -61,6 +61,7 @@ TRAIN:
     LR: 3e-5
     WD: 1e-6
     BATCH_SIZE: 32
+    USE_MULTILABEL: true
 
     CHECKPOINT: ""
     SHUFFLE: true
