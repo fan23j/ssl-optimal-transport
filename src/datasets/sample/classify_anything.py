@@ -34,7 +34,9 @@ class ClassifyAnythingSampler(Sampler):
         ]
 
         # Initialize a tensor for one-hot vectors
-        targets = torch.zeros(len(self.mixed_labels) if self.mixed_labels else len(dataset.class_labels))
+        targets = torch.zeros(
+            len(self.mixed_labels) if self.mixed_labels else len(dataset.class_labels)
+        )
 
         # Populate one-hot vectors using target indices
         targets[target_indices] = 1

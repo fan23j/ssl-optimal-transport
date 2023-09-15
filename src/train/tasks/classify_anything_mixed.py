@@ -61,6 +61,7 @@ class ClassifyAnythingMixedTrainer(BaseTrainer):
                     multiclass_text_features
                     / multiclass_text_features.norm(dim=-1, keepdim=True)
                 )
+
                 loss, loss_states, payload = self.loss(
                     features=features,
                     multilabel_text_features=multilabel_text_features,
