@@ -61,6 +61,7 @@ TRAIN:
     LR: 3e-5
     WD: 1e-6
     BATCH_SIZE: 32
+    USE_MULTILABEL: false
 
     CHECKPOINT: ""
     SHUFFLE: true

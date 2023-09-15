@@ -70,14 +70,21 @@ class TinyImageNet(torch.utils.data.Dataset):
 
         self.transform = self.train_transform if train else self.test_transform
 
-        descriptions = [
+        multilabel_descriptions = [
             f"a photo that contains a {self.class_descriptions[cls]}"
             for cls in self.classes
         ]
+        multiclass_descriptions = [
+            f"a photo of a {self.class_descriptions[cls]}"
+            for cls in self.classes
+        ]
         # Tokenize
-        self.text_inputs = torch.cat(
-            [clip.tokenize(description) for description in descriptions]
+        self.multilabel_text_inputs = torch.cat(
+            [clip.tokenize(description) for description in multilabel_descriptions]
         )
+        self.multiclass_text_inputs = torch.cat(
+            [clip.tokenize(description) for description in multiclass_descriptions]
+        )    
         self.sampler = sampler
 
     def __len__(self):
