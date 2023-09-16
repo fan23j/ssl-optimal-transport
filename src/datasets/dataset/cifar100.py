@@ -10,6 +10,14 @@ class CIFAR100(CIFAR100):
     def __init__(self, cfg, root, train=True, download=False, sampler=None):
         super().__init__(root, train=train, download=download)
         self.name = "cifar100"
+        
+        # LT
+        if cfg.DATASET.LT_IMBALANCE_RATIO != 1.0:
+            self.data, self.targets = self.create_imbalance(self.data, self.targets, cfg.DATASET.LT_IMBALANCE_RATIO, cfg.DATASET.LT_REVERSE)
+            
+        # Calculate class ratios
+        self.ratios = self.calculate_ratios(self.targets)
+        
         optional_padding = OptionalPad(
             fill=0,
             padding_enabled=cfg.DATASET.PAD_CIFAR,
@@ -162,6 +170,35 @@ class CIFAR100(CIFAR100):
             "woman",
             "worm",
         ]
+
+        
+    def calculate_ratios(self, targets):
+        class_counts = [targets.count(i) for i in range(100)]
+        total_samples = sum(class_counts)
+        return [count / total_samples for count in class_counts]
+    
+    def create_imbalance(self, data, targets, imbalance_ratio, lt_reverse=False):
+        class_indices = [np.where(np.array(targets) == i)[0] for i in range(100)]
+        min_len = min(len(indices) for indices in class_indices)
+
+        new_data = []
+        new_targets = []
+
+        if lt_reverse:
+            iter_order = reversed(list(enumerate(class_indices)))
+        else:
+            iter_order = enumerate(class_indices)
+
+        for i, indices in iter_order:
+            # Determine the number of samples to keep for the current class
+            keep_len = int(min_len * (imbalance_ratio ** i))
+            indices = np.random.choice(indices, keep_len, replace=False)
+
+            new_data.extend(data[indices])
+            new_targets.extend([i] * keep_len)
+
+        return np.array(new_data), new_targets
+
 
     def __getitem__(self, index):
         img, target = self.data[index], self.targets[index]

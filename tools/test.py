@@ -30,7 +30,7 @@ def main(cfg, local_rank):
 
     # load in dataset
     print("Setting up data...")
-    _, val_dataset = get_dataset(cfg)
+    train_dataset, val_dataset = get_dataset(cfg)
 
     # Create validation dataloader
     val_loader = torch.utils.data.DataLoader(
@@ -60,7 +60,7 @@ def main(cfg, local_rank):
 
     # set up trainer code from train_factory
     Trainer = train_factory[cfg.TASK]
-    trainer = Trainer(cfg, model, optimizer=optimizer, lr_scheduler=lr_scheduler)
+    trainer = Trainer(cfg, model, optimizer=optimizer, lr_scheduler=lr_scheduler, train_dataset=train_dataset, val_dataset=val_dataset)
 
     trainer.set_device(device)
 

@@ -1,5 +1,5 @@
 DATA_DIR: "/home/ubuntu/ssl-optimal-transport/data/tiny-imagenet-200"
-EXP_ID: "classify_anything_tiny_imagenet_single"
+EXP_ID: "classify_anything_tiny_imagenet_single_ofa"
 TASK: "classify_anything_single"
 DEBUG: 0
 DEBUG_THEME: "white"
@@ -25,7 +25,6 @@ MODEL:
     INPUT_H: 224
     INPUT_W: 224
     HEAD_INPUT_DIM: 512
-    LABEL_VECTORS: "/home/main/ssl-optimal-transport/weights/mixed_label_vectors.pt"
     OUTPUT_FEATURES: 512
     HIDDEN_MLP: 1048
 
@@ -35,7 +34,7 @@ LOSS:
 
 DATASET:
     DATASET: "TINY_IMAGENET"
-    SAMPLE: "CLASSIFY_ANYTHING"
+    SAMPLE: "NONE"
     TRAIN_SET: "train"
     TEST_SET: "valid"
     NUM_CLASSES: 200
@@ -61,7 +60,7 @@ TRAIN:
     LR: 3e-5
     WD: 1e-6
     BATCH_SIZE: 32
-    USE_MULTILABEL: false
+    USE_MULTICLASS: true
 
     CHECKPOINT: ""
     SHUFFLE: true

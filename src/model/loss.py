@@ -11,6 +11,7 @@ from .criterion.classify_anything_multilabel import Classify_Anything_MultiLabel
 from .criterion.classify_anything_mixed import Classify_Anything_Mixed_Loss
 from .criterion.classify_anything_mixed_ot import Classify_Anything_Mixed_OT_Loss
 from .criterion.bce import BCE_Loss
+from .criterion.inference_sinkhorn import Inference_Sinkhorn_Loss
 
 _loss_factory = {
     "infonce": Info_NCE_Loss,
@@ -24,6 +25,7 @@ _loss_factory = {
     "classify_anything_mixed": Classify_Anything_Mixed_Loss,
     "classify_anything_mixed_ot": Classify_Anything_Mixed_OT_Loss,
     "bce": BCE_Loss,
+    "inference_sinkhorn": Inference_Sinkhorn_Loss
 }
 
 

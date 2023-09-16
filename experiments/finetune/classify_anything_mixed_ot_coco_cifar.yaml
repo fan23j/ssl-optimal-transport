@@ -1,5 +1,5 @@
 DATA_DIR: "/home/ubuntu/ssl-optimal-transport/data"
-EXP_ID: "classify_anything_mixed_clip_ot_coco_cifar"
+EXP_ID: "classify_anything_mixed_clip_ot_coco_cifar_higher_lr"
 TASK: "classify_anything_mixed_ot"
 DEBUG: 0
 DEBUG_THEME: "white"
@@ -56,7 +56,7 @@ TRAIN:
     RESUME: false
     EPOCHS: 50
     NUM_ITERS: -1
-    LR: 3e-5
+    LR: 3e-4
     WD: 1e-4
     BATCH_SIZE: 32
     WARMUP_EPOCHS: 20

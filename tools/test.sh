@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=0 python3 test.py --cfg ../experiments/finetune/classify_anything_mixed.yaml
+python test.py --cfg ../experiments/finetune/classify_anything_cifar100_single.yaml

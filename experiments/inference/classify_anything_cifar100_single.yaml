@@ -1,10 +1,10 @@
 DATA_DIR: "/home/ubuntu/ssl-optimal-transport/data"
-EXP_ID: "classify_anything_cifar100_single_contains_test"
+EXP_ID: "classify_anything_cifar100_single_contains_sinkhorn_lt_no_change"
 TASK: "classify_anything_single"
 DEBUG: 0
 DEBUG_THEME: "white"
 SEED: 317
-OUTPUT_DIR: "/home/ubuntu/ssl-optimal-transport/runs/finetune"
+OUTPUT_DIR: "/home/ubuntu/ssl-optimal-transport/runs/inference"
 LOG_DIR: ""
 EXPERIMENT_NAME: ""
 GPUS: [0]
@@ -19,7 +19,7 @@ CUDNN:
 
 MODEL:
     INIT_WEIGHTS: false
-    PRETRAINED: "/home/ubuntu/ssl-optimal-transport/runs/finetune/classify_anything_cifar100_single/model_last.pth"
+    PRETRAINED: "/home/ubuntu/ssl-optimal-transport/runs/finetune/classify_anything_cifar100_single_contains/model_last.pth"
     NAME: "clip"
     HEADS: ["projection", "reshape"]
     INPUT_H: 224
@@ -29,7 +29,7 @@ MODEL:
     HIDDEN_MLP: 1048
 
 LOSS:
-    METRIC: ["classify_anything"]
+    METRIC: ["inference_sinkhorn"]
     TEMPERATURE: 0.5
 
 DATASET:
@@ -39,6 +39,8 @@ DATASET:
     TEST_SET: "valid"
     NUM_CLASSES: 100
     PAD_CIFAR: true
+    LT_IMBALANCE_RATIO: 1.0
+    LT_REVERSE: false
 
     # training data augmentation
     MEAN: [0.4914, 0.4822, 0.4465]

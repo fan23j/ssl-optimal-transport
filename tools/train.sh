@@ -1,1 +1,1 @@
-python train.py --cfg ../experiments/finetune/classify_anything_tiny_imagenet_single.yaml
+python train.py --cfg ../experiments/finetune/classify_anything_mixed_ot_coco_cifar.yaml
