@@ -28,7 +28,7 @@ class MixedDatasetNuswideCifar(Dataset):
         self.cifar_len = len(self.cifar_dataset)
         self.total_len = self.nuswide_len + self.cifar_len
         self.epoch_counter = 0
-        with open(cfg.DATASET.MIXED_LABELS, 'r') as file:
+        with open(cfg.DATASET.MIXED_LABELS, "r") as file:
             self.mixed_labels = json.load(file)
 
         self.mixed_indices = {value: key for key, value in self.mixed_labels.items()}
@@ -77,10 +77,10 @@ class MixedDatasetNuswideCifar(Dataset):
         # Determine dataset and retrieve item
         if index % 2 == 0:  # Choose 'nuswide'
             index = self.nuswide_permutation[index // 2 % self.nuswide_len]
-            return self.nuswide_dataset[index], 1
+            return self.nuswide_dataset[index], 0
         else:  # Choose 'cifar'
             index = self.cifar_permutation[index // 2 % self.cifar_len]
-            return self.cifar_dataset[index], 0
+            return self.cifar_dataset[index], 1
 
     def __len__(self):
         return self.total_len

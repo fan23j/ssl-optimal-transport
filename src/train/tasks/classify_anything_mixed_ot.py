@@ -39,7 +39,7 @@ class ClassifyAnythingMixedOtTrainer(BaseTrainer):
             self.dataset.on_epoch_start()
             for it, (batch_data, dataset_indices) in enumerate(data_bar):
                 data, targets = batch_data["out_1"], batch_data["target"]
-
+                
                 data = data.cuda(non_blocking=True)
 
                 features = self.model(data)
