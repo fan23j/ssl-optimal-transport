@@ -24,7 +24,7 @@ class NUSWIDEClassification(data.Dataset):
             "a photo that contains a " + category for category in self.all_categories
         ]
         # Tokenize
-        self.text_inputs = torch.cat(
+        self.multilabel_text_inputs = torch.cat(
             [clip.tokenize(description) for description in descriptions]
         )
         # Read data
@@ -53,7 +53,21 @@ class NUSWIDEClassification(data.Dataset):
             ]
         )
         self.transform = self.train_transform if train else self.test_transform
+        self.ratios = self.calculate_ratios()
 
+    def calculate_ratios(self):
+        # Initialize a zero array for each category
+        category_counts = np.zeros(len(self.all_categories))
+
+        # Count positive labels for each category
+        for _, labels in self.data:
+            category_counts += np.array(labels)
+
+        # Calculate the ratio
+        total_samples = len(self.data)
+        ratios = category_counts / total_samples
+        return ratios.tolist() 
+    
     def __getitem__(self, index):
         path, labels = self.data[index]
         img = Image.open(path).convert("RGB")

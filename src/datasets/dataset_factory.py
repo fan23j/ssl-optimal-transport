@@ -15,6 +15,7 @@ from .dataset.mixed_dataset_nuswide_imagenet import MixedDatasetNuswideImageNet
 from .sample.mae import MaeSampler
 from .sample.simclr import SimCLRSampler
 from .sample.classify_anything import ClassifyAnythingSampler
+from .sample.multiclass_inference import MulticlassInferenceSampler
 
 
 _dataset_factory = {
@@ -37,6 +38,7 @@ _sample_factory = {
     "SIMCLR": SimCLRSampler,
     "MAE": MaeSampler,
     "CLASSIFY_ANYTHING": ClassifyAnythingSampler,
+    "MULTICLASS_INFERENCE": MulticlassInferenceSampler,
     "NONE": None,
 }
 

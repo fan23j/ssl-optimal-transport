@@ -49,7 +49,7 @@ class ClassifyAnythingMultiTrainer(BaseTrainer):
                     )
                 else:
                     text_features = self.model.module.backbone_model.encode_text(
-                        self.dataset.multlabel_text_inputs.to("cuda")
+                        self.dataset.multilabel_text_inputs.to("cuda")
                     )
 
                 text_features = text_features / text_features.norm(dim=-1, keepdim=True)

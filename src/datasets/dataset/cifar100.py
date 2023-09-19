@@ -2,6 +2,8 @@ from torchvision.datasets import CIFAR100
 import torchvision.transforms as transforms
 import torch
 import clip
+import numpy as np
+from .cifar10 import CIFAR10
 
 
 class CIFAR100(CIFAR100):
@@ -10,14 +12,18 @@ class CIFAR100(CIFAR100):
     def __init__(self, cfg, root, train=True, download=False, sampler=None):
         super().__init__(root, train=train, download=download)
         self.name = "cifar100"
-        
+        self.cls_num = 100
+        self.cifar10_dataset = CIFAR10(
+            cfg, root, train=train, download=download, sampler=sampler
+        )
         # LT
         if cfg.DATASET.LT_IMBALANCE_RATIO != 1.0:
-            self.data, self.targets = self.create_imbalance(self.data, self.targets, cfg.DATASET.LT_IMBALANCE_RATIO, cfg.DATASET.LT_REVERSE)
+            img_num_list = self.get_img_num_per_cls(self.cls_num, cfg.DATASET.LT_IMBALANCE_RATIO)
+            self.gen_imbalanced_data(img_num_list, reverse=cfg.DATASET.LT_REVERSE)
             
         # Calculate class ratios
         self.ratios = self.calculate_ratios(self.targets)
-        
+
         optional_padding = OptionalPad(
             fill=0,
             padding_enabled=cfg.DATASET.PAD_CIFAR,
@@ -177,27 +183,34 @@ class CIFAR100(CIFAR100):
         total_samples = sum(class_counts)
         return [count / total_samples for count in class_counts]
     
-    def create_imbalance(self, data, targets, imbalance_ratio, lt_reverse=False):
-        class_indices = [np.where(np.array(targets) == i)[0] for i in range(100)]
-        min_len = min(len(indices) for indices in class_indices)
+    def get_img_num_per_cls(self, cls_num, imb_factor):
+        img_max = len(self.data) / cls_num
+        img_num_per_cls = []
+        for cls_idx in range(cls_num):
+            num = img_max * (imb_factor**(cls_idx / (cls_num - 1.0)))
+            img_num_per_cls.append(int(num))
+        return img_num_per_cls
+
+    def gen_imbalanced_data(self, img_num_per_cls, reverse=False):
+        if reverse:
+            img_num_per_cls = img_num_per_cls[::-1]  # reverse the list
 
         new_data = []
         new_targets = []
+        targets_np = np.array(self.targets, dtype=np.int64)
+        classes = np.unique(targets_np)
 
-        if lt_reverse:
-            iter_order = reversed(list(enumerate(class_indices)))
-        else:
-            iter_order = enumerate(class_indices)
-
-        for i, indices in iter_order:
-            # Determine the number of samples to keep for the current class
-            keep_len = int(min_len * (imbalance_ratio ** i))
-            indices = np.random.choice(indices, keep_len, replace=False)
-
-            new_data.extend(data[indices])
-            new_targets.extend([i] * keep_len)
-
-        return np.array(new_data), new_targets
+        self.num_per_cls_dict = dict()
+        for the_class, the_img_num in zip(classes, img_num_per_cls):
+            self.num_per_cls_dict[the_class] = the_img_num
+            idx = np.where(targets_np == the_class)[0]
+            np.random.shuffle(idx)
+            selec_idx = idx[:the_img_num]
+            new_data.append(self.data[selec_idx, ...])
+            new_targets.extend([the_class, ] * the_img_num)
+        new_data = np.vstack(new_data)
+        self.data = new_data
+        self.targets = new_targets
 
 
     def __getitem__(self, index):

@@ -52,12 +52,14 @@ class Coco(datasets.coco.CocoDetection):
             "a photo of a " + category for category in self.all_categories
         ]
         # Tokenize
-        self.multlabel_text_inputs = torch.cat(
+        self.multilabel_text_inputs = torch.cat(
             [clip.tokenize(description) for description in multilabel_descriptions]
         )
         self.multiclass_text_inputs = torch.cat(
             [clip.tokenize(description) for description in multiclass_descriptions]
         )
+        self.ratios = self.compute_label_distribution()
+
         self.sampler = sampler
         self.class_labels = [
             "person",
@@ -141,7 +143,20 @@ class Coco(datasets.coco.CocoDetection):
             "hair drier",
             "toothbrush",
         ]
+        
+    def compute_label_distribution(self):
+        label_counts = [0] * len(self.cat2cat)
+        for index in self.ids:
+            ann_ids = self.coco.getAnnIds(imgIds=index)
+            anns = self.coco.loadAnns(ann_ids)
+            for ann in anns:
+                cat_index = self.cat2cat[ann['category_id']]
+                label_counts[cat_index] += 1
 
+        total_annotations = sum(label_counts)
+        ratios = [count / total_annotations for count in label_counts]
+        return ratios
+        
     def __getitem__(self, index):
         coco = self.coco
         img_id = self.ids[index]

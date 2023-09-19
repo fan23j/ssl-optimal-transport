@@ -9,7 +9,7 @@ class Inference_Sinkhorn_Loss(nn.Module):
         super(Inference_Sinkhorn_Loss, self).__init__()
         self.temperature = cfg.LOSS.TEMPERATURE
         
-    def sinkhorn_knopp(a, b, M, reg, numItermax=1000, stopThr=1e-9, verbose=False, log=False, warn=True, warmstart=None, **kwargs):
+    def sinkhorn_knopp(self, a, b, M, reg=0.5, numItermax=1000, stopThr=1e-9, verbose=False, log=False, warn=True, warmstart=None, **kwargs):
         """
         a: 1_bz
         b: ratios [r_1,r_2,...]
@@ -17,7 +17,7 @@ class Inference_Sinkhorn_Loss(nn.Module):
         """
 
         # init data
-        dim_a = len(a)
+        dim_a = a.shape[0]
         dim_b = b.shape[0]
 
         u = torch.ones(dim_a, dtype=M.dtype, device=M.device) / dim_a
@@ -49,17 +49,33 @@ class Inference_Sinkhorn_Loss(nn.Module):
                     break
 
         return u.reshape((-1, 1)) * K * v.reshape((1, -1))
+    
+    def iterate_P(self, sim_matrix, b, num_iterations=5):
+        P = torch.exp(sim_matrix)
 
-    def forward(self, features, text_features, targets, dataset, **kwargs):
+        for _ in range(num_iterations):
+            sum_r = P.sum(dim=1)
+            P = torch.div(P, sum_r.unsqueeze(1))
+            
+            sum_c = P.sum(dim=0)
+            P = torch.div(P, sum_c.t()/b)
+        return P
+
+
+    def forward(self, features, text_features, targets, dataset, sim_matrix_whole=None, total_num=0,**kwargs):
         sim_matrix = torch.matmul(features, text_features.t()) / self.temperature
-        cost_matrix = 1.0 - sim_matrix
-        
-        bs = features.shape[0]
-        a = dataset.ratios * bs
-        b = torch.ones(bs)
-        
-        M = self.sinkhorn_knopp(a, b, sim_matrix / cost_matrix, numItermax=100)
+        loss = torch.tensor(0)
+        if sim_matrix_whole is not None:
+            bs = total_num
+            b = torch.tensor(dataset.ratios).to("cuda") * bs
+#             a = torch.ones(bs).to("cuda")
 
-        return {"classify_anything_loss": loss}, M
+#             M = self.sinkhorn_knopp(a, b, sim_matrix_whole, reg=0.5, numItermax=10)
+            M = self.iterate_P(sim_matrix_whole, b, num_iterations=10)
+            return {"classify_anything_loss": loss}, M
+        
+
+
+        return {"classify_anything_loss": loss}, sim_matrix
 
     

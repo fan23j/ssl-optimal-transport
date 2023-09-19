@@ -1,7 +1,7 @@
-DATA_DIR: "/home/ubuntu/ssl-optimal-transport/data"
-EXP_ID: "classify_anything_cifar100_single_ofa_sinkhorn_lt"
-#TASK: "classify_anything_single"
-TASK: "inference_sinkhorn"
+DATA_DIR: "/home/ubuntu/ssl-optimal-transport/data/nuswide"
+EXP_ID: "classify_anything_nuswide_multi"
+#TASK: "inference_multilabel"
+TASK: "classify_anything_multi"
 DEBUG: 0
 DEBUG_THEME: "white"
 SEED: 317
@@ -20,38 +20,27 @@ CUDNN:
 
 MODEL:
     INIT_WEIGHTS: false
-    PRETRAINED: "/home/ubuntu/ssl-optimal-transport/runs/finetune/classify_anything_mixed_coco_cifar_batchwise/model_last.pth"
+    PRETRAINED: "/home/ubuntu/ssl-optimal-transport/runs/finetune/classify_anything_nuswide_multi_contains/model_last.pth"
     NAME: "clip"
     HEADS: ["projection", "reshape"]
-    #HEADS: ["none"]
     INPUT_H: 224
     INPUT_W: 224
     HEAD_INPUT_DIM: 512
+    LABEL_VECTORS: "/home/main/ssl-optimal-transport/weights/mixed_label_vectors.pt"
     OUTPUT_FEATURES: 512
     HIDDEN_MLP: 1048
 
 LOSS:
-    #METRIC: ["classify_anything"]
-    METRIC: ["inference_sinkhorn"]
-    TEMPERATURE: 0.2
+    #METRIC: ["inference_multilabel"]
+    METRIC: ["classify_anything_multi"]
+    TEMPERATURE: 0.5
 
 DATASET:
-    DATASET: "CIFAR100"
-    SAMPLE: "SIMCLR"
+    DATASET: "NUSWIDE"
+    SAMPLE: "NONE"
     TRAIN_SET: "train"
     TEST_SET: "valid"
-    NUM_CLASSES: 100
-    PAD_CIFAR: true
-    LT_IMBALANCE_RATIO: 0.5
-    LT_REVERSE: true
-
-    # training data augmentation
-    MEAN: [0.4914, 0.4822, 0.4465]
-    STD: [0.2023, 0.1994, 0.2010]
-    RANDOM_RESIZED_CROP: 224
-    RANDOM_HORIZONTAL_FLIP: 0.5
-    COLOR_JITTER: [0.4, 0.4, 0.4, 0.1, 0.8]
-    RANDOM_GRAYSCALE: 0.2
+    NUM_CLASSES: 81
     IMAGE_SIZE: 224
 
 TRAIN:
@@ -64,9 +53,9 @@ TRAIN:
     EPOCHS: 50
     NUM_ITERS: -1
     LR: 3e-5
-    WD: 1e-6
+    WD: 1e-4
     BATCH_SIZE: 32
-    USE_MULTICLASS: true
+    WARMUP_EPOCHS: 20
 
     CHECKPOINT: ""
     SHUFFLE: true

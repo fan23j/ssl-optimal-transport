@@ -49,13 +49,14 @@ def main(cfg, local_rank):
     # load in pretrained weights
     print("Creating model...")
     model = create_model(cfg.MODEL.NAME, cfg)
-    print("load pretrained model from {}".format(cfg.MODEL.PRETRAINED))
-    model, optimizer, lr_scheduler, start_epoch = load_model(
-        cfg,
-        model,
-        optimizer,
-        lr_scheduler,
-    )
+    if cfg.MODEL.PRETRAINED != "":
+        print("load pretrained model from {}".format(cfg.MODEL.PRETRAINED))
+        model, optimizer, lr_scheduler, start_epoch = load_model(
+            cfg,
+            model,
+            optimizer,
+            lr_scheduler,
+        )
     model.to(device)
 
     # set up trainer code from train_factory
@@ -68,20 +69,28 @@ def main(cfg, local_rank):
     with torch.no_grad():
         log_dict_val = trainer.val(0, val_loader)
 
-    for k, v in log_dict_val.items():
-        if k == "imgs":
-            logger.write_image(k, v, 0)
-        elif k == "figure":
-            logger.add_figure(k, v.gcf(), 0)
-        else:
-            logger.write("{} {:8f} | ".format(k, v))
+#     for k, v in log_dict_val.items():
+#         if k == "imgs":
+#             logger.write_image(k, v, 0)
+#         elif k == "figure":
+#             logger.add_figure(k, v.gcf(), 0)
+#         else:
+#             logger.write("{} {:8f} | ".format(k, v))
 
-    logger.write("\n")
-    logger.close()
+#     logger.write("\n")
+#     logger.close()
 
 
 if __name__ == "__main__":
     args = parse_args()
     update_config(cfg, args.cfg)
     local_rank = args.local_rank
+    exps = [[1.0, False],[0.9,False,],[0.5,False],[0.3,False],[0.9,True],[0.5,True],[0.3,True]]
     main(cfg, local_rank)
+    # for exp in exps:
+    #     cfg.defrost() 
+    #     cfg.DATASET.LT_IMBALANCE_RATIO = exp[0]
+    #     cfg.DATASET.LT_REVESER = exp[1]
+    #     cfg.freeze()
+    #     main(cfg, local_rank)
+    #     print(exp)

@@ -1,5 +1,5 @@
-DATA_DIR: "/home/ubuntu/ssl-optimal-transport/data"
-EXP_ID: "classify_anything_cifar100_single_ofa_sinkhorn_lt"
+DATA_DIR: "/home/ubuntu/ssl-optimal-transport/data/tiny-imagenet-200"
+EXP_ID: "classify_anything_tiny_imagenet_single_ofa"
 #TASK: "classify_anything_single"
 TASK: "inference_sinkhorn"
 DEBUG: 0
@@ -9,7 +9,7 @@ OUTPUT_DIR: "/home/ubuntu/ssl-optimal-transport/runs/inference"
 LOG_DIR: ""
 EXPERIMENT_NAME: ""
 GPUS: [0]
-WORKERS: 0
+WORKERS: 8
 PRINT_FREQ: 0
 PIN_MEMORY: true
 RANK: 0
@@ -20,7 +20,7 @@ CUDNN:
 
 MODEL:
     INIT_WEIGHTS: false
-    PRETRAINED: "/home/ubuntu/ssl-optimal-transport/runs/finetune/classify_anything_mixed_coco_cifar_batchwise/model_last.pth"
+    PRETRAINED: "/home/ubuntu/ssl-optimal-transport/runs/finetune/classify_anything_mixed_coco_imagenet_ot/model_last.pth"
     NAME: "clip"
     HEADS: ["projection", "reshape"]
     #HEADS: ["none"]
@@ -33,17 +33,14 @@ MODEL:
 LOSS:
     #METRIC: ["classify_anything"]
     METRIC: ["inference_sinkhorn"]
-    TEMPERATURE: 0.2
+    TEMPERATURE: 0.1
 
 DATASET:
-    DATASET: "CIFAR100"
-    SAMPLE: "SIMCLR"
+    DATASET: "TINY_IMAGENET"
+    SAMPLE: "NONE"
     TRAIN_SET: "train"
     TEST_SET: "valid"
-    NUM_CLASSES: 100
-    PAD_CIFAR: true
-    LT_IMBALANCE_RATIO: 0.5
-    LT_REVERSE: true
+    NUM_CLASSES: 200
 
     # training data augmentation
     MEAN: [0.4914, 0.4822, 0.4465]
@@ -53,6 +50,8 @@ DATASET:
     COLOR_JITTER: [0.4, 0.4, 0.4, 0.1, 0.8]
     RANDOM_GRAYSCALE: 0.2
     IMAGE_SIZE: 224
+    LT_IMBALANCE_RATIO: 0.5
+    LT_REVERSE: false
 
 TRAIN:
     OPTIMIZER: "adamw"
@@ -75,4 +74,7 @@ TRAIN:
 
 TEST:
     BATCH_SIZE: 32
+    OUTPUT_FILE: "infonce_preds.csv"
+    TASK: "simclr_linear"
+    MODEL_PATH: "/home/main/ssl-optimal-transport/runs/finetune/simclr_cifar10_infonce/model_last.pth"
     DROP_LAST: true

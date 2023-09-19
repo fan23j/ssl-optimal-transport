@@ -5,6 +5,7 @@ import clip
 from torchvision import transforms
 from PIL import Image
 from randaugment import RandAugment
+import numpy as np
 
 
 class TinyImageNet(torch.utils.data.Dataset):
@@ -43,6 +44,13 @@ class TinyImageNet(torch.utils.data.Dataset):
                     os.path.join(self.image_dir, label, "images")
                 )
             ]
+            
+        # LT
+        if cfg.DATASET.LT_IMBALANCE_RATIO != 1.0:
+            img_num_list = self.get_img_num_per_cls(len(self.classes), cfg.DATASET.LT_IMBALANCE_RATIO)
+            self.gen_imbalanced_data(img_num_list, reverse=cfg.DATASET.LT_REVERSE)
+            
+        self.ratios = self.calculate_ratios([item[1] for item in self.data])
 
         # Set transformations
         optional_padding = OptionalPad(
@@ -86,6 +94,37 @@ class TinyImageNet(torch.utils.data.Dataset):
             [clip.tokenize(description) for description in multiclass_descriptions]
         )    
         self.sampler = sampler
+        
+    def calculate_ratios(self, labels):
+        class_counts = [labels.count(cls) for cls in self.classes]
+        total_samples = sum(class_counts)
+        return [count / total_samples for count in class_counts]
+    
+    def get_img_num_per_cls(self, cls_num, imb_factor):
+        img_max = len(self.data) / cls_num
+        img_num_per_cls = []
+        for cls_idx in range(cls_num):
+            num = img_max * (imb_factor**(cls_idx / (cls_num - 1.0)))
+            img_num_per_cls.append(int(num))
+        return img_num_per_cls
+
+    def gen_imbalanced_data(self, img_num_per_cls, reverse=False):
+        if reverse:
+            img_num_per_cls = img_num_per_cls[::-1]  # reverse the list
+
+        new_data = []
+        targets_np = np.array([self.class_to_idx[label] for _, label in self.data], dtype=np.int64)
+        classes = np.unique(targets_np)
+
+        self.num_per_cls_dict = dict()
+        for the_class, the_img_num in zip(classes, img_num_per_cls):
+            self.num_per_cls_dict[the_class] = the_img_num
+            idx = np.where(targets_np == the_class)[0]
+            np.random.shuffle(idx)
+            selec_idx = idx[:the_img_num]
+            new_data.extend([self.data[i] for i in selec_idx])
+        self.data = new_data
+
 
     def __len__(self):
         return len(self.data)

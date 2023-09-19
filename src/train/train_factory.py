@@ -9,6 +9,8 @@ from .tasks.classify_anything_single import ClassifyAnythingSingleTrainer
 from .tasks.multiclass_linear import MultiClassLinearTrainer
 from .tasks.classify_anything_mixed import ClassifyAnythingMixedTrainer
 from .tasks.classify_anything_mixed_ot import ClassifyAnythingMixedOtTrainer
+from .tasks.inference_sinkhorn import InferenceSinkhornTrainer
+from .tasks.inference_multilabel import InferenceMultilabelTrainer
 
 train_factory = {
     "simclr_pretrain": SimCLRPreTrainer,
@@ -21,4 +23,6 @@ train_factory = {
     "multiclass_linear": MultiClassLinearTrainer,
     "classify_anything_mixed": ClassifyAnythingMixedTrainer,
     "classify_anything_mixed_ot": ClassifyAnythingMixedOtTrainer,
+    "inference_sinkhorn": InferenceSinkhornTrainer,
+    "inference_multilabel": InferenceMultilabelTrainer,
 }
