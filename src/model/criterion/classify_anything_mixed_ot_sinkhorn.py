@@ -5,21 +5,13 @@ from .asymmetric import AsymmetricLossOptimized
 from .utils import convert_targets
 
 
-class Classify_Anything_Mixed_OT_Loss(nn.Module):
+class Classify_Anything_Mixed_OT_Sinkhorn_Loss(nn.Module):
     def __init__(
         self,
         cfg,
-        gamma_neg=4,
-        gamma_pos=1,
-        clip=0.05,
-        eps=1e-8,
-        disable_torch_grad_focal_loss=False,
     ):
-        super(Classify_Anything_Mixed_OT_Loss, self).__init__()
+        super(Classify_Anything_Mixed_OT_Sinkhorn_Loss, self).__init__()
         self.temperature = cfg.LOSS.TEMPERATURE
-        self.asym_loss = AsymmetricLossOptimized(
-            gamma_neg, gamma_pos, clip, eps, disable_torch_grad_focal_loss
-        )
 
     def forward(
         self,
@@ -48,11 +40,11 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
         multiclass_indices = dataset_indices == 1
         multilabel_indices = dataset_indices == 0
 
-        _multilabel_sim_matrix = multilabel_sim_matrix[
-            multilabel_indices.nonzero().squeeze()
-        ]
         _multiclass_sim_matrix = multiclass_sim_matrix[
             multiclass_indices.nonzero().squeeze()
+        ]
+        _multilabel_sim_matrix = multilabel_sim_matrix[
+            multilabel_indices.nonzero().squeeze()
         ]
 
         # (number of multiclass images) * 1 + (number of multilabel images) * 0.1
@@ -67,11 +59,24 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
             dataset.multiclass_labels,
             dataset_indices,
         )
-        
-        # Compute loss
-        multilabel_loss = self.asym_loss(
-            multilabel_sim_matrix, multilabel_targets.to("cuda")
-        )
+
+        bs, num_class = multilabel_sim_matrix.shape
+        sim_matrix = torch.zeros((bs, num_class, 2))
+        sim_matrix[:,:,0] = multilabel_sim_matrix / 2
+        sim_matrix[:,:,1] = -multilabel_sim_matrix / 2
+        b = torch.tensor(dataset.ratios).to("cuda")
+
+        b = torch.cat([b.unsqueeze(1), 1-b.unsqueeze(1)], dim=1) * bs
+        M = iterate_M(sim_matrix.to("cuda"), b, num_iterations=2)
+
+        #_M = M[multilabel_indices.nonzero().squeeze()]
+
+        multilabel_targets_final = torch.stack([
+            multilabel_targets,
+            1 - multilabel_targets,
+        ], dim=-1)
+
+        multilabel_loss = -torch.sum(multilabel_targets_final.to("cuda") * torch.log(M))
 
         multiclass_loss = -torch.sum(multiclass_targets.to("cuda") * torch.log(P))
 

@@ -15,9 +15,9 @@ from ..base_trainer import BaseTrainer
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-class ClassifyAnythingMixedOtTrainer(BaseTrainer):
+class ClassifyAnythingMixedOtSinkhornTrainer(BaseTrainer):
     def __init__(self, cfg, model, optimizer, lr_scheduler, train_dataset, val_dataset):
-        super(ClassifyAnythingMixedOtTrainer, self).__init__(
+        super(ClassifyAnythingMixedOtSinkhornTrainer, self).__init__(
             cfg, model, optimizer, lr_scheduler, train_dataset, val_dataset
         )
         self.train_dataset = train_dataset
@@ -112,7 +112,7 @@ class ClassifyAnythingMixedOtTrainer(BaseTrainer):
 
                 average_precisions = []
                 for class_idx in range(cur_targets.shape[1]):
-                    class_preds = cur_preds[:, class_idx].detach().numpy()
+                    class_preds = cur_preds[:,:,0][:, class_idx].detach().numpy()
                     class_targets = cur_targets[:, class_idx].detach().numpy()
 
                     try:
