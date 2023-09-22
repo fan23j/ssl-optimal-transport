@@ -68,10 +68,25 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
             dataset_indices,
         )
 
+        bs, num_class = multilabel_sim_matrix.shape
+        sim_matrix = torch.zeros((bs, num_class, 2))
+        sim_matrix[:,:,0] = multilabel_sim_matrix / 2
+        sim_matrix[:,:,1] = -multilabel_sim_matrix / 2
+        b = torch.tensor(dataset.ratios).to("cuda")
+        b = torch.cat([b.unsqueeze(1), 1-b.unsqueeze(1)], dim=1) * bs
+        M = iterate_M(sim_matrix.to("cuda"), b, num_iterations=2)
+
+        _M = M[multilabel_indices.nonzero().squeeze()]
         # Compute loss
-        multilabel_loss = self.asym_loss(
-            multilabel_sim_matrix, multilabel_targets.to("cuda")
-        )
+        # multilabel_loss = self.asym_loss(
+        #     multilabel_sim_matrix, multilabel_targets.to("cuda")
+        # )
+
+        multilabel_targets_final = torch.stack([
+            multilabel_targets,
+            1 - multilabel_targets,
+        ], dim=-1)
+        multilabel_loss = -torch.sum(multilabel_targets_final.to("cuda") * torch.log(M))
 
         multiclass_loss = -torch.sum(multiclass_targets.to("cuda") * torch.log(P))
 
@@ -82,7 +97,7 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
             "multiclass_loss": multiclass_loss,
             "multilabel_loss": multilabel_loss,
         }, [
-            _multilabel_sim_matrix,
+            _M,
             _multiclass_sim_matrix,
             multilabel_targets,
             multiclass_targets,
@@ -108,6 +123,16 @@ class Classify_Anything_Mixed_OT_Loss(nn.Module):
 #         P = P * scaling_factor
 #     return P
 
+def iterate_M(sim_matrix, b, num_iterations=5):
+        P = torch.exp(sim_matrix)
+
+        for _ in range(num_iterations):
+            sum_in = P.sum(dim=2)
+            P = torch.div(P, sum_in.unsqueeze(2))
+
+            sum_down = P.sum(dim=0)
+            P = torch.div(P, sum_down/b)
+        return P
 
 def iterate_P(sim_matrix, m, num_iterations=5):
     P = torch.exp(sim_matrix)

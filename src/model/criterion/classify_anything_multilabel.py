@@ -56,7 +56,7 @@ class Classify_Anything_MultiLabel_Loss(nn.Module):
             gamma_neg, gamma_pos, clip, eps, disable_torch_grad_focal_loss
         )
 
-    def forward(self, features, text_features, targets, model, **kwargs):
+    def forward(self, features, text_features, targets, **kwargs):
         """
         features: [B, 300]
         text_features: [num_class, 512]

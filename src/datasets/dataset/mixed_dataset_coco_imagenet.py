@@ -29,6 +29,7 @@ class MixedDatasetCocoImageNet(Dataset):
         self.imagenet_len = len(self.imagenet_dataset)
         self.total_len = self.coco_len + self.imagenet_len
         self.epoch_counter = 0
+        self.coco_ratios = self.coco_dataset.ratios
 
         with open(cfg.DATASET.MIXED_LABELS, 'r') as file:
             self.mixed_labels = json.load(file)

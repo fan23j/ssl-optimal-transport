@@ -9,12 +9,11 @@ class Inference_Multilabel_Loss(nn.Module):
         super(Inference_Multilabel_Loss, self).__init__()
         self.temperature = cfg.LOSS.TEMPERATURE
         
-    def iterate_P(self, sim_matrix, b, num_iterations=5):
-        P = torch.exp(sim_matrix)
-
+    def iterate_P(self, sim_matrix, b, num_iterations=15):
+        P = torch.exp(sim_matrix) # [samples, num_classs, 2]
         for _ in range(num_iterations):
-            sum_in = P.sum(dim=2)
-            P = torch.div(P, sum_in.unsqueeze(2))
+            sum_in = P.sum(dim=2) #[samples, num_class]
+            P = torch.div(P, sum_in.unsqueeze(2)) #[samples, num_class, 2] / [samples, num_class, 1]
 
             sum_down = P.sum(dim=0)
             P = torch.div(P, sum_down/b)
@@ -31,9 +30,9 @@ class Inference_Multilabel_Loss(nn.Module):
         loss = torch.tensor(0)
         if sim_matrix_whole is not None:
             bs = total_num
-            b = torch.tensor(dataset.ratios).to("cuda") * bs
-            b = torch.cat([b.unsqueeze(1), b.unsqueeze(1)], dim=1)
-            M = self.iterate_P(sim_matrix_whole.to("cuda"), b, num_iterations=10)
+            b = torch.tensor(dataset.ratios).to("cuda")
+            b = torch.cat([b.unsqueeze(1), 1-b.unsqueeze(1)], dim=1) * bs
+            M = self.iterate_P(sim_matrix_whole.to("cuda"), b, num_iterations=15)
             return {"classify_anything_loss": loss}, M
 
         return {"classify_anything_loss": loss}, sim_matrix

@@ -28,6 +28,8 @@ class MixedDatasetNuswideImageNet(Dataset):
         self.imagenet_len = len(self.imagenet_dataset)
         self.total_len = self.nuswide_len + self.imagenet_len
         self.epoch_counter = 0
+        self.imagenet_ratios = self.imagenet_dataset.ratios
+        self.ratios = self.nuswide_dataset.ratios
         with open(cfg.DATASET.MIXED_LABELS, 'r') as file:
             self.mixed_labels = json.load(file)
 

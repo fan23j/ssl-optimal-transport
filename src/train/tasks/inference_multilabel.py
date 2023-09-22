@@ -85,8 +85,10 @@ class InferenceMultilabelTrainer(BaseTrainer):
 
         average_precisions = []
         for class_idx in range(cur_targets.shape[1]):
+            #import pudb;
             class_preds = cur_preds[:,:,0][:, class_idx].detach().numpy()
-            #class_preds = (cur_preds[:, :, 0] >= cur_preds[:, :, 1]).long().detach().numpy()
+            # max_vals, _ = torch.min(cur_preds, dim=2)
+            # class_preds = max_vals[:, class_idx].detach().numpy()
             class_targets = cur_targets[:, class_idx].cpu().detach().numpy()
 
             try:

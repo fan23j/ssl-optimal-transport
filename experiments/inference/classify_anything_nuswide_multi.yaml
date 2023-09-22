@@ -1,7 +1,7 @@
 DATA_DIR: "/home/ubuntu/ssl-optimal-transport/data/nuswide"
 EXP_ID: "classify_anything_nuswide_multi"
-#TASK: "inference_multilabel"
-TASK: "classify_anything_multi"
+TASK: "inference_multilabel"
+#TASK: "classify_anything_multi"
 DEBUG: 0
 DEBUG_THEME: "white"
 SEED: 317
@@ -31,9 +31,9 @@ MODEL:
     HIDDEN_MLP: 1048
 
 LOSS:
-    #METRIC: ["inference_multilabel"]
-    METRIC: ["classify_anything_multi"]
-    TEMPERATURE: 0.5
+    METRIC: ["inference_multilabel"]
+    #METRIC: ["classify_anything_multi"]
+    TEMPERATURE: 0.3
 
 DATASET:
     DATASET: "NUSWIDE"

@@ -33,7 +33,7 @@ MODEL:
 LOSS:
     #METRIC: ["classify_anything_multi"]
     METRIC: ["inference_multilabel"]
-    TEMPERATURE: 0.5
+    TEMPERATURE: 1.0
 
 DATASET:
     DATASET: "COCO"

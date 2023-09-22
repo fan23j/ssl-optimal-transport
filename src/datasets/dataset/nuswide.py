@@ -55,18 +55,39 @@ class NUSWIDEClassification(data.Dataset):
         self.transform = self.train_transform if train else self.test_transform
         self.ratios = self.calculate_ratios()
 
+#     def calculate_ratios(self):
+#         # Initialize a zero array for each category
+#         category_counts = np.zeros(len(self.all_categories))
+        
+#         # Count positive labels for each category
+#         for _, labels in self.data:
+#             category_counts += np.array(labels)
+
+#         # Calculate the ratio
+#         total_samples = len(self.data)
+#         ratios = category_counts / total_samples
+#         return ratios.tolist() 
+    
+    
     def calculate_ratios(self):
         # Initialize a zero array for each category
         category_counts = np.zeros(len(self.all_categories))
 
+        # Initialize a variable to store the total number of labels
+        total_labels = 0
+
         # Count positive labels for each category
         for _, labels in self.data:
             category_counts += np.array(labels)
+            total_labels += sum(labels)  # Assuming labels is a list of binary values [1, 0, 1, ...]
+
+        # Check if total_labels is not zero to avoid division by zero error
+        if total_labels == 0:
+            return [0] * len(self.all_categories)
 
         # Calculate the ratio
-        total_samples = len(self.data)
-        ratios = category_counts / total_samples
-        return ratios.tolist() 
+        ratios = category_counts / total_labels
+        return ratios.tolist()
     
     def __getitem__(self, index):
         path, labels = self.data[index]

@@ -112,7 +112,7 @@ class ClassifyAnythingMixedOtTrainer(BaseTrainer):
 
                 average_precisions = []
                 for class_idx in range(cur_targets.shape[1]):
-                    class_preds = cur_preds[:, class_idx].detach().numpy()
+                    class_preds = cur_preds[:,:,0][:, class_idx].detach().numpy()
                     class_targets = cur_targets[:, class_idx].detach().numpy()
 
                     try:

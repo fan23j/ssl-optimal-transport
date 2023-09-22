@@ -19,6 +19,7 @@ class MixedDatasetCocoCifar(Dataset):
         self.cifar_dataset = CIFAR100(
             cfg, root, train=train, download=download, sampler=sampler
         )
+        self.ratios = self.coco_dataset.ratios
         self.train = train
         self.coco_len = len(self.coco_dataset)
         self.cifar_len = len(self.cifar_dataset)
