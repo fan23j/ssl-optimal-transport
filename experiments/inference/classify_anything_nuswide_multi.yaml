@@ -33,7 +33,7 @@ MODEL:
 LOSS:
     METRIC: ["inference_multilabel"]
     #METRIC: ["classify_anything_multi"]
-    TEMPERATURE: 0.3
+    TEMPERATURE: 1.0
 
 DATASET:
     DATASET: "NUSWIDE"

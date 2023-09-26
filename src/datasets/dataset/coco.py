@@ -4,6 +4,7 @@ import torch
 import torchvision.transforms as transforms
 import random
 import clip
+import math
 
 from torchvision import datasets
 from pycocotools.coco import COCO
@@ -59,6 +60,11 @@ class Coco(datasets.coco.CocoDetection):
             [clip.tokenize(description) for description in multiclass_descriptions]
         )
         self.ratios = self.compute_label_distribution()
+        self.neg_ratios = self.compute_positive_negative_ratios()
+        self.log_ratios = self.compute_log_ratios()
+        self.inverse_ratios = self.compute_inverse_ratios()
+        self.weighted_ratios = self.compute_weighted_ratios()
+        self.pairwise_ratios = self.compute_pairwise_label_ratios()
 
         self.sampler = sampler
         self.class_labels = [
@@ -146,16 +152,125 @@ class Coco(datasets.coco.CocoDetection):
         
     def compute_label_distribution(self):
         label_counts = [0] * len(self.cat2cat)
+        total_images = len(self.ids)
         for index in self.ids:
             ann_ids = self.coco.getAnnIds(imgIds=index)
             anns = self.coco.loadAnns(ann_ids)
+            unique_cats = set()
             for ann in anns:
                 cat_index = self.cat2cat[ann['category_id']]
+                unique_cats.add(cat_index)
+                
+            for cat_index in unique_cats:
                 label_counts[cat_index] += 1
 
-        total_annotations = sum(label_counts)
-        ratios = [count / total_annotations for count in label_counts]
+
+        ratios = [count / total_images for count in label_counts]
         return ratios
+    
+    def compute_inverse_ratios(self):
+        label_counts = [0] * len(self.cat2cat)
+        total_images = len(self.ids)
+        for index in self.ids:
+            ann_ids = self.coco.getAnnIds(imgIds=index)
+            anns = self.coco.loadAnns(ann_ids)
+            unique_cats = set()
+            for ann in anns:
+                cat_index = self.cat2cat[ann['category_id']]
+                unique_cats.add(cat_index)
+
+            for cat_index in unique_cats:
+                label_counts[cat_index] += 1
+
+        ratios = [1 - (count / total_images) for count in label_counts]
+        return ratios
+    
+    
+    def compute_positive_negative_ratios(self):
+        label_counts = [0] * len(self.cat2cat)
+        negative_counts = [0] * len(self.cat2cat)
+        total_images = len(self.ids)
+
+        for index in self.ids:
+            ann_ids = self.coco.getAnnIds(imgIds=index)
+            anns = self.coco.loadAnns(ann_ids)
+            unique_cats = set()
+            for ann in anns:
+                cat_index = self.cat2cat[ann['category_id']]
+                unique_cats.add(cat_index)
+
+            for cat_index in range(len(self.cat2cat)):
+                if cat_index in unique_cats:
+                    label_counts[cat_index] += 1
+                else:
+                    negative_counts[cat_index] += 1
+
+        ratios = [label_counts[i] / (label_counts[i] + negative_counts[i]) for i in range(len(self.cat2cat))]
+        return ratios
+    
+    def compute_log_ratios(self):
+        label_counts = [0] * len(self.cat2cat)
+        total_images = len(self.ids)
+
+        for index in self.ids:
+            ann_ids = self.coco.getAnnIds(imgIds=index)
+            anns = self.coco.loadAnns(ann_ids)
+            unique_cats = set()
+            for ann in anns:
+                cat_index = self.cat2cat[ann['category_id']]
+                unique_cats.add(cat_index)
+
+            for cat_index in unique_cats:
+                label_counts[cat_index] += 1
+
+        ratios = [count / total_images + 1e-6 for count in label_counts]  # Added epsilon to avoid division by zero
+        log_ratios = [math.log(ratio) for ratio in ratios]  # Compute log ratios
+
+        # Offset the Log Ratios
+        min_log_ratio = min(log_ratios)
+        epsilon = 1e-10
+        offset_log_ratios = [x - min_log_ratio + epsilon for x in log_ratios]
+
+        # Min-Max Scaling to [min_bound, max_bound]
+        min_bound, max_bound = 0.01, 0.99  # Adjust as needed
+        min_val = min(offset_log_ratios)
+        max_val = max(offset_log_ratios)
+
+        scaled_log_ratios = [
+            min_bound + (x - min_val) * (max_bound - min_bound) / (max_val - min_val)
+            for x in offset_log_ratios
+        ]
+
+        return scaled_log_ratios
+
+    
+    def compute_pairwise_label_ratios(self):
+        total_images = len(self.ids)
+        label_len = len(self.cat2cat)
+        
+        # Initialize a dictionary to store the count for each pair of labels
+        label_pair_counts = defaultdict(int)
+        
+        # Iterate over each image in the dataset
+        for index in self.ids:
+            ann_ids = self.coco.getAnnIds(imgIds=index)
+            anns = self.coco.loadAnns(ann_ids)
+            
+            # Create a set representing the unique presence of each label in the image
+            present_labels = set(self.cat2cat[ann['category_id']] for ann in anns)
+            
+            # Iterate over all possible label combinations
+            for label_i, label_j in combinations(range(label_len), 2):
+                # Check condition Yi + Yj <= 1, meaning at most one of the labels is present
+                if (label_i in present_labels) != (label_j in present_labels):
+                    label_pair_counts[frozenset((label_i, label_j))] += 1
+        
+        # Calculate ratios
+        label_pair_ratios = {pair: count / total_images for pair, count in label_pair_counts.items()}
+        
+        return label_pair_ratios
+
+
         
     def __getitem__(self, index):
         coco = self.coco

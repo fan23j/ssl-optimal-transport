@@ -75,11 +75,12 @@ if __name__ == "__main__":
     update_config(cfg, args.cfg)
     local_rank = args.local_rank
     #exps = [[1.0, False],[0.9,False,],[0.5,False],[0.3,False],[0.9,True],[0.5,True],[0.3,True]]
+    exps = [0.05, 0.1, 0.2, 0.3, 0.4]
     main(cfg, local_rank)
     # for exp in exps:
     #     cfg.defrost() 
-    #     cfg.DATASET.LT_IMBALANCE_RATIO = exp[0]
-    #     cfg.DATASET.LT_REVESER = exp[1]
+    #     cfg.DATASET.RATIO_GAMMA = exp
+    #     #cfg.DATASET.LT_REVESER = exp[1]
     #     cfg.freeze()
     #     main(cfg, local_rank)
     #     print(exp)

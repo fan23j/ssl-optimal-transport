@@ -1,10 +1,10 @@
-DATA_DIR: "/home/main/data"
-EXP_ID: "classify_anything_mixed_clip_ot_coco_cifar_test"
+DATA_DIR: "/home/ubuntu/ssl-optimal-transport/data"
+EXP_ID: "classify_anything_mixed_coco_cifar_ot_0.5ml"
 TASK: "classify_anything_mixed_ot"
 DEBUG: 0
 DEBUG_THEME: "white"
 SEED: 317
-OUTPUT_DIR: "/home/main/ssl-optimal-transport/runs/test"
+OUTPUT_DIR: "/home/ubuntu/ssl-optimal-transport/runs/test"
 LOG_DIR: ""
 EXPERIMENT_NAME: ""
 GPUS: [0]
@@ -19,7 +19,7 @@ CUDNN:
 
 MODEL:
     INIT_WEIGHTS: true
-    PRETRAINED: "/home/main/ssl-optimal-transport/runs/finetune/classify_anything_mixed_clip_ot_coco_cifar_rerun/model_last.pth"
+    PRETRAINED: "/home/ubuntu/ssl-optimal-transport/runs/finetune/classify_anything_mixed_coco_cifar_ot/model_last.pth"
     NAME: "clip"
     HEADS: ["projection", "reshape"]
     INPUT_H: 224
@@ -30,7 +30,7 @@ MODEL:
 
 LOSS:
     METRIC: ["classify_anything_mixed_ot_sinkhorn"]
-    TEMPERATURE: 1.0
+    TEMPERATURE: 0.5
 
 DATASET:
     DATASET: "MIXED_COCO_CIFAR"
@@ -45,7 +45,7 @@ DATASET:
     VAL_ANNOTATIONS: "annotations/instances_val2017.json"
     PAD_CIFAR: true
     RANDOM_RESIZED_CROP: 224
-    MIXED_LABELS: "/home/main/ssl-optimal-transport/data/mixed_coco_cifar.txt"
+    MIXED_LABELS: "/home/ubuntu/ssl-optimal-transport/data/mixed_coco_cifar.txt"
 
 TRAIN:
     OPTIMIZER: "adamw"

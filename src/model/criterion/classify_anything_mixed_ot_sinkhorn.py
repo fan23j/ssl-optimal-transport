@@ -76,7 +76,7 @@ class Classify_Anything_Mixed_OT_Sinkhorn_Loss(nn.Module):
             1 - multilabel_targets,
         ], dim=-1)
 
-        multilabel_loss = -torch.sum(multilabel_targets_final.to("cuda") * torch.log(M))
+        multilabel_loss = -torch.sum(multilabel_targets_final.to("cuda") * torch.log(M)) * 0.5
 
         multiclass_loss = -torch.sum(multiclass_targets.to("cuda") * torch.log(P))
 

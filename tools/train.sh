@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=0 python3 train.py --cfg ../experiments/finetune/classify_anything_mixed_ot_coco_cifar.yaml
+python train.py --cfg ../experiments/finetune/classify_anything_mixed_ot_coco_cifar.yaml

@@ -78,28 +78,55 @@ class InferenceMultilabelTrainer(BaseTrainer):
                     sim_matrix_whole=sim_matrix_whole,
                     total_num=total_num,
         )
-        
-        multilabel_preds = torch.sigmoid(sim_matrix)
+       
+        multilabel_preds = torch.sigmoid(sim_matrix_whole)
         cur_preds = multilabel_preds.cpu()
         cur_targets = torch.cat(targets_list, dim=0)
+        mAP = calc_mAP(cur_preds[:,:,0].detach().numpy(),cur_targets.cpu().detach().numpy())
+#         average_precisions = []
+#         for class_idx in range(cur_targets.shape[1]):
+#             #import pudb;
+#             class_preds = cur_preds[:,:,0][:, class_idx].detach().numpy()
+#             # max_vals, _ = torch.min(cur_preds, dim=2)
+#             # class_preds = max_vals[:, class_idx].detach().numpy()
+#             class_targets = cur_targets[:, class_idx].cpu().detach().numpy()
 
-        average_precisions = []
-        for class_idx in range(cur_targets.shape[1]):
-            #import pudb;
-            class_preds = cur_preds[:,:,0][:, class_idx].detach().numpy()
-            # max_vals, _ = torch.min(cur_preds, dim=2)
-            # class_preds = max_vals[:, class_idx].detach().numpy()
-            class_targets = cur_targets[:, class_idx].cpu().detach().numpy()
-
-            try:
-                average_precision = average_precision_score(
-                    class_targets, class_preds
-                )
-                average_precisions.append(average_precision)
-            except UndefinedMetricWarning:
-                pass  # Ignore this specific warning
-        mAP = np.mean(average_precisions)
+#             try:
+#                 average_precision = average_precision_score(
+#                     class_targets, class_preds
+#                 )
+#                 average_precisions.append(average_precision)
+#             except UndefinedMetricWarning:
+#                 pass  # Ignore this specific warning
+#         mAP = np.mean(average_precisions)
         print("mAP:", mAP * 100)
 
     def val(self, epoch, test_data_loader):
         return self.train(epoch, test_data_loader, is_train=False)
+    
+def calc_mAP(predictions, targets):
+    """
+    Args:
+    predictions (np.ndarray): Predicted scores or probabilities, with the shape [batch_size, num_classes].
+    targets (np.ndarray): Ground truth binary labels, with the shape [batch_size, num_classes].
+
+    Returns:
+        float: The mAP score.
+    """
+    # Ensuring the predictions are in the same shape as targets
+    assert predictions.shape == targets.shape, "The shape of predictions and targets should be the same"
+
+    aps = []
+    for i in range(predictions.shape[1]):  # Loop over each class
+        class_preds = predictions[:, i]
+        class_targets = targets[:, i]
+
+        try:
+            ap = average_precision_score(class_targets, class_preds)
+            if not np.isnan(ap):
+                aps.append(ap)
+        except Exception as e:
+            print(f"Error calculating Average Precision for class {i}: {e}")
+
+    mAP = np.mean(aps)
+    return mAP

@@ -1,0 +1,9 @@
+car-handbag
+car-bottle
+car-cup
+car-bowl
+car-book
+bus-chair
+truck-chair
+traffic light-chair
+bench-chair
