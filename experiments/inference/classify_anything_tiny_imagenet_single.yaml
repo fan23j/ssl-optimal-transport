@@ -1,7 +1,7 @@
 DATA_DIR: "/home/ubuntu/ssl-optimal-transport/data/tiny-imagenet-200"
 EXP_ID: "classify_anything_tiny_imagenet_single_ofa"
-#TASK: "classify_anything_single"
-TASK: "inference_sinkhorn"
+TASK: "classify_anything_single"
+#TASK: "inference_sinkhorn"
 DEBUG: 0
 DEBUG_THEME: "white"
 SEED: 317
@@ -31,8 +31,8 @@ MODEL:
     HIDDEN_MLP: 1048
 
 LOSS:
-    #METRIC: ["classify_anything"]
-    METRIC: ["inference_sinkhorn"]
+    METRIC: ["classify_anything"]
+    #METRIC: ["inference_sinkhorn"]
     TEMPERATURE: 0.1
 
 DATASET:

@@ -1,7 +1,7 @@
 DATA_DIR: "/home/ubuntu/ssl-optimal-transport/data"
 EXP_ID: "classify_anything_cifar100_single_ofa_sinkhorn_lt"
-#TASK: "classify_anything_single"
-TASK: "inference_sinkhorn"
+TASK: "classify_anything_single"
+#TASK: "inference_sinkhorn"
 DEBUG: 0
 DEBUG_THEME: "white"
 SEED: 317
@@ -20,7 +20,7 @@ CUDNN:
 
 MODEL:
     INIT_WEIGHTS: false
-    PRETRAINED: "/home/ubuntu/ssl-optimal-transport/runs/finetune/classify_anything_mixed_coco_cifar_batchwise/model_last.pth"
+    PRETRAINED: "/home/ubuntu/ssl-optimal-transport/runs/finetune/classify_anything_mixed_nuswide_cifar_ot/model_last.pth"
     NAME: "clip"
     HEADS: ["projection", "reshape"]
     #HEADS: ["none"]
@@ -65,7 +65,7 @@ TRAIN:
     NUM_ITERS: -1
     LR: 3e-5
     WD: 1e-6
-    BATCH_SIZE: 1
+    BATCH_SIZE: 32
     USE_MULTICLASS: true
 
     CHECKPOINT: ""
@@ -74,5 +74,5 @@ TRAIN:
     TRAINVAL: false
 
 TEST:
-    BATCH_SIZE: 1
+    BATCH_SIZE: 32
     DROP_LAST: true

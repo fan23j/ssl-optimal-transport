@@ -19,16 +19,7 @@ class Classify_Anything_Loss(nn.Module):
         # Normalize features and labels_vector along the feature dimension
         # features_norm = F.normalize(features, dim=1)
         # labels_vector_norm = F.normalize(labels_vector, dim=1)
-        import pudb; pudb.set_trace()
-        cosim_matrix = torch.matmul(features.t(), text_features[targets.item()].unsqueeze(0)) / self.temperature
-        correlations_2d = TSNE(n_components=2).fit_transform(cosim_matrix.cpu().numpy())
-
-        # Plotting
-        plt.scatter(correlations_2d[:, 0], correlations_2d[:, 1], c='b', alpha=0.5)
-
-        plt.title('Visualization of Local Class Embedding and Dense Image Feature')
-        plt.savefig('/home/ubuntu/ssl-optimal-transport/runs/test/images/fig.png')
-        import pudb; pudb.set_trace()
+        cosim_matrix = torch.matmul(features, text_features.t()) / self.temperature
         
         cosim_softmax = F.softmax(cosim_matrix, dim=1)
 

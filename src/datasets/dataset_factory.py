@@ -51,6 +51,6 @@ def get_dataset(cfg):
 
     # (train_dataset, test_dataset)
     return (
-        dataset(cfg, cfg.DATA_DIR, train=True, download=True, sampler=sampler),
+        dataset(cfg, cfg.DATA_DIR, train=False, download=True, sampler=sampler),
         dataset(cfg, cfg.DATA_DIR, train=False, download=True, sampler=sampler),
     )

@@ -68,9 +68,6 @@ class Inference_Sinkhorn_Loss(nn.Module):
         if sim_matrix_whole is not None:
             bs = total_num
             b = torch.tensor(dataset.ratios).to("cuda") * bs
-#             a = torch.ones(bs).to("cuda")
-
-#             M = self.sinkhorn_knopp(a, b, sim_matrix_whole, reg=0.5, numItermax=10)
             M = self.iterate_P(sim_matrix_whole, b, num_iterations=10)
             return {"classify_anything_loss": loss}, M
         

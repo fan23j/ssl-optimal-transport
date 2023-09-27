@@ -79,26 +79,11 @@ class InferenceMultilabelTrainer(BaseTrainer):
                     total_num=total_num,
         )
        
-        multilabel_preds = torch.sigmoid(sim_matrix_whole)
-        cur_preds = multilabel_preds.cpu()
+        #multilabel_preds = torch.sigmoid(sim_matrix_whole)
+        cur_preds = sim_matrix.cpu()
         cur_targets = torch.cat(targets_list, dim=0)
         mAP = calc_mAP(cur_preds[:,:,0].detach().numpy(),cur_targets.cpu().detach().numpy())
-#         average_precisions = []
-#         for class_idx in range(cur_targets.shape[1]):
-#             #import pudb;
-#             class_preds = cur_preds[:,:,0][:, class_idx].detach().numpy()
-#             # max_vals, _ = torch.min(cur_preds, dim=2)
-#             # class_preds = max_vals[:, class_idx].detach().numpy()
-#             class_targets = cur_targets[:, class_idx].cpu().detach().numpy()
 
-#             try:
-#                 average_precision = average_precision_score(
-#                     class_targets, class_preds
-#                 )
-#                 average_precisions.append(average_precision)
-#             except UndefinedMetricWarning:
-#                 pass  # Ignore this specific warning
-#         mAP = np.mean(average_precisions)
         print("mAP:", mAP * 100)
 
     def val(self, epoch, test_data_loader):
